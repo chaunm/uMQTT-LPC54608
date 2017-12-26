@@ -1,6 +1,6 @@
 # uMQTT-LPC54608
 ## Overview
-Porting the MQTT layer form Microsoft's Azure IoT hub SDK (https://github.com/Azure/azure-iot-sdk-c) to use as common MQTT client for ARM Cortex-M MCU. 
+Porting the MQTT layer from Microsoft's Azure IoT hub SDK (https://github.com/Azure/azure-iot-sdk-c) to use as common MQTT client for ARM Cortex-M MCU. 
 
 More detail for porting please visit https://github.com/Azure/azure-c-shared-utility/tree/934bc731639f892bc26cbbae8b09274122505825/devdoc
 
@@ -19,7 +19,7 @@ TLS: MbedTLS
 
 The LPC54608 SDK was built from NXP website https://mcuxpresso.nxp.com/en/welcome
 ## TLS support
-This project create a mqtt client that support broker with x509 CA Cert and private key.
+This project create a mqtt client that supports broker with x509 CA Cert and private key.
 
 To understand how to create an MQTT broker with CA cert and private key please refer to this below link:
 
