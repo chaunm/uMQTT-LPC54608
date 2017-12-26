@@ -17,7 +17,7 @@ IP stack: LWIP
 
 TLS: MbedTLS
 
-The LPC54608 was built from NXP
+The LPC54608 SDK was built from NXP website https://mcuxpresso.nxp.com/en/welcome
 ## TLS support
 This project create a mqtt client that support broker with x509 CA Cert and private key.
 
