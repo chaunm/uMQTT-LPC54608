@@ -1,0 +1,10 @@
+/.settings
+/Debug
+/Release
+/Debug_SSL_ExT
+/Debug SSL
+/doc
+/fatfs
+/sdmmc
+*.mex
+*.launch

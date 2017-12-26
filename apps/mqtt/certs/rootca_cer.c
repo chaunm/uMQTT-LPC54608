@@ -1,0 +1,27 @@
+//#include "wiced_resource.h"
+#include <certs/certs.h>
+                                                  \
+const char rootCa[] = "-----BEGIN CERTIFICATE-----\n" \
+"MIIDpzCCAo+gAwIBAgIJAL7XQVlwtosfMA0GCSqGSIb3DQEBDQUAMGoxFzAVBgNV\n" \
+"BAMMDkFuIE1RVFQgYnJva2VyMRYwFAYDVQQKDA1Pd25UcmFja3Mub3JnMRQwEgYD\n" \
+"VQQLDAtnZW5lcmF0ZS1DQTEhMB8GCSqGSIb3DQEJARYSbm9ib2R5QGV4YW1wbGUu\n" \
+"bmV0MB4XDTE3MTEyOTAxNTM0MFoXDTMyMTEyNTAxNTM0MFowajEXMBUGA1UEAwwO\n" \
+"QW4gTVFUVCBicm9rZXIxFjAUBgNVBAoMDU93blRyYWNrcy5vcmcxFDASBgNVBAsM\n" \
+"C2dlbmVyYXRlLUNBMSEwHwYJKoZIhvcNAQkBFhJub2JvZHlAZXhhbXBsZS5uZXQw\n" \
+"ggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDc8ZYwojWDquxtSbopzWxR\n" \
+"cwheIU04ZtPVV3T+wVHVcEduEwXZtlyip1/BXaz4SMYiptaFoZEBkvd87nrYmUVg\n" \
+"bK0UCExSpk5r6I2ZNor89wd3Bm9BvrPd6GNYxTo5tfcHh9pYcE7zxSjHpxaMuftY\n" \
+"TFvzGA0Is+lZQrTasi7/CNmQFO1mmAMceHKti88ATkK3ot1+jq5kGShEr2LBLMEV\n" \
+"zRuYfQzPW/gaKdfDKYuUnvgGn6dP6XUb0sCITMlZ3j8ycAZE7yCwAObZ2oKar3ks\n" \
+"be2xPozWoy2afLTiCNwroc+yv1R38uXJR1X95VqSTgpspCOF1pb8coQ4T1kzNRnR\n" \
+"AgMBAAGjUDBOMB0GA1UdDgQWBBTK+1lfxeLIyORsajDqdgbx9PCBWzAfBgNVHSME\n" \
+"GDAWgBTK+1lfxeLIyORsajDqdgbx9PCBWzAMBgNVHRMEBTADAQH/MA0GCSqGSIb3\n" \
+"DQEBDQUAA4IBAQBkHPWF7+adsRn+YxVIilrPO6LW5+OBkSwO2WBdo6s8UBZJg1o7\n" \
+"2kIkw80O6V8+arit2TQigOMSSduQ62jxHOnM1ktsNou2zYBz+PfhD18MpVqNBfd2\n" \
+"YFt9W659+/Jn4PxbW8gv+8SKDaB6G+p1DgEXNrvqsY++S+nbff8Z63iI8xWuhxVl\n" \
+"+adpchV9Sb1gu6K/TU4NWgxxHTzxGGUD6BC4nPS23GWW0ODd803HRwpllQkeYgLe\n" \
+"LrXNGQXFSXUFCaMeF+XYsYFNYiGEEdPAtwzgodkDWrK8a7cVLwOS5f3OTvp6mL8/\n" \
+"ZyanhiKuyg5QONIWza3PmWBSAlzgpLT2FmbQ\n" \
+"-----END CERTIFICATE-----\n";
+
+const size_t rootCaSize = sizeof(rootCa);
