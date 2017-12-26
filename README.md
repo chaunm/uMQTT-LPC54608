@@ -1,6 +1,6 @@
 # uMQTT-LPC54608
 ## Overwiev
-Porting the MQTT layer form Microsoft's Azure IoT hub SDK to use as common MQTT client for ARM Cortex-M MCU (https://github.com/Azure/azure-c-shared-utility/blob/master/devdoc/porting_guide.md). 
+Porting the MQTT layer form Microsoft's Azure IoT hub SDK (https://github.com/Azure/azure-c-shared-utility) to use as common MQTT client for ARM Cortex-M MCU. 
 
 More detail for porting please visit https://github.com/Azure/azure-c-shared-utility/tree/934bc731639f892bc26cbbae8b09274122505825/devdoc
 
