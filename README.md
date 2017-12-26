@@ -6,9 +6,15 @@ More detail for porting please visit https://github.com/Azure/azure-c-shared-uti
 
 ## System description:
 Board: NXP's OM13092
+
 MCU: LPC54608 arm Cortex-M4
+
 toolchain: NXP's MCUExpresso 10.1.0
+
 OS: FreeRTOS
+
 IP stack: LWIP
+
 TLS: MbedTLS
+
 The LPC54608 was built from NXP
