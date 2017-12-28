@@ -21,15 +21,6 @@
 #include "azure_c_shared_utility/socketio.h"
 #include "azure_c_shared_utility/xio.h"
 
-typedef struct MQTT_CLIENT_INFO_TAG
-{
-	char* hostName;
-	char* username;
-	char* password;
-	char* x509_client_cert;
-	char* private_key;
-	char* certificate;
-};
 sys_thread_t xMqttThread;
 
 static const char* TOPIC_NAME_A = "LPC54608/TEST";
@@ -38,6 +29,23 @@ static const char* APP_NAME_A = "This is the app msg A.";
 
 static uint16_t PACKET_ID_VALUE = 11;
 static bool g_continue = true;
+
+static int ActorPublish(MQTT_CLIENT_HANDLE mqtt_client, const char* topic, const char* message, size_t size, uint8_t qos)
+{
+	MQTT_MESSAGE_HANDLE msg = mqttmessage_create(PACKET_ID_VALUE, topic, qos, (const uint8_t*)message, size);
+	if (msg == NULL)
+		return -1;
+	if (mqtt_client_publish(mqtt_client, msg) != 0)
+	{
+		mqttmessage_destroy(msg);
+		return -1;
+	}
+	else
+	{
+		mqttmessage_destroy(msg);
+		return 0;
+	}
+}
 
 static void OnRecvCallback(MQTT_MESSAGE_HANDLE  msgHandle, void* context)
 {
@@ -55,26 +63,16 @@ static void OnRecvCallback(MQTT_MESSAGE_HANDLE  msgHandle, void* context)
 	{
 		PRINTF("%c", messagePayload->message[index]);
 	}
+	PRINTF("\r\nmessage count %d\r\n", ++messageCount);
 #if MQTT_USE_TLS
-	MQTT_MESSAGE_HANDLE msg = mqttmessage_create(PACKET_ID_VALUE++, TOPIC_NAME_B, DELIVER_EXACTLY_ONCE, (const uint8_t*)APP_NAME_A, strlen(APP_NAME_A));
+	if (ActorPublish(mqttHandle, TOPIC_NAME_B, APP_NAME_A, strlen(APP_NAME_A), DELIVER_EXACTLY_ONCE) != 0)
 #else
-	MQTT_MESSAGE_HANDLE msg = mqttmessage_create(PACKET_ID_VALUE++, TOPIC_NAME_A, DELIVER_EXACTLY_ONCE, (const uint8_t*)APP_NAME_A, strlen(APP_NAME_A));
+	if (ActorPublish(mqttHandle, TOPIC_NAME_A, APP_NAME_A, strlen(APP_NAME_A), DELIVER_EXACTLY_ONCE) != 0)
 #endif
-	if (msg == NULL)
 	{
-		PRINTF("%d: mqttmessage_create failed\r\n", __LINE__);
+		PRINTF("%d: mqtt_client_publish failed\r\n", __LINE__);
 		g_continue = false;
 	}
-	else
-	{
-		if (mqtt_client_publish(mqttHandle, msg))
-		{
-			PRINTF("%d: mqtt_client_publish failed\r\n", __LINE__);
-			g_continue = false;
-		}
-		mqttmessage_destroy(msg);
-	}
-	PRINTF("\r\nmessage count %d\r\n", ++messageCount);
 }
 
 static void OnOperationComplete(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_RESULT actionResult, const void* msgInfo, void* callbackCtx)
@@ -136,9 +134,7 @@ static void OnOperationComplete(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_RES
         }
         case MQTT_CLIENT_ON_PUBLISH_COMP:
         {
-//        	PRINTF("MQTT_CLIENT_ON_PUBLISH_COMP\n");
-            // Done so send disconnect
-            //mqtt_client_disconnect(handle, NULL, NULL);
+        	PRINTF("MQTT Client publish finished\n");
             break;
         }
         case MQTT_CLIENT_ON_DISCONNECT:

@@ -49,6 +49,7 @@
 #define _FSL_DEBUGCONSOLE_H_
 
 #include "fsl_common.h"
+#include "app_gui.h"
 /*!
  * @addtogroup debugconsole
  * @{
@@ -71,7 +72,7 @@
 #ifndef LCD_PRINT
 #define PRINTF DbgConsole_Printf
 #else
-#define PRINTF APP_GUI_printf
+#define PRINTF LCD_PRINTF
 #endif
 #define SCANF DbgConsole_Scanf
 #define PUTCHAR DbgConsole_Putchar

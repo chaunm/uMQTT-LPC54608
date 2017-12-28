@@ -36,7 +36,7 @@ static void cbBackgroundWin(WM_MESSAGE *pMsg)
             WM_DefaultProc(pMsg);
     }
 }
-
+/*
 static void cbCanvasWin(WM_MESSAGE *pMsg)
 {
     GUI_PID_STATE *pid_state;
@@ -63,7 +63,7 @@ static void cbCanvasWin(WM_MESSAGE *pMsg)
             WM_DefaultProc(pMsg);
     }
 }
-
+*/
 void APP_GUI_Init()
 {
 	CLOCK_AttachClk(kMCLK_to_LCD_CLK);
@@ -103,7 +103,7 @@ int APP_GUI_printf(const char* string, ...)
         WM_Exec();
         GUI_Clear();
         GUI_GotoXY(0,0);
-    }    
+    }
     GUI_DispString(displayString);
     WM_Exec();
     free(displayString);
