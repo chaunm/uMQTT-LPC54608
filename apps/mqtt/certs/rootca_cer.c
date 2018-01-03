@@ -1,6 +1,6 @@
 //#include "wiced_resource.h"
 #include <certs/certs.h>
-                                                  \
+/*
 const char rootCa[] = "-----BEGIN CERTIFICATE-----\n" \
 "MIIDpzCCAo+gAwIBAgIJAL7XQVlwtosfMA0GCSqGSIb3DQEBDQUAMGoxFzAVBgNV\n" \
 "BAMMDkFuIE1RVFQgYnJva2VyMRYwFAYDVQQKDA1Pd25UcmFja3Mub3JnMRQwEgYD\n" \
@@ -22,6 +22,30 @@ const char rootCa[] = "-----BEGIN CERTIFICATE-----\n" \
 "+adpchV9Sb1gu6K/TU4NWgxxHTzxGGUD6BC4nPS23GWW0ODd803HRwpllQkeYgLe\n" \
 "LrXNGQXFSXUFCaMeF+XYsYFNYiGEEdPAtwzgodkDWrK8a7cVLwOS5f3OTvp6mL8/\n" \
 "ZyanhiKuyg5QONIWza3PmWBSAlzgpLT2FmbQ\n" \
+"-----END CERTIFICATE-----\n";
+*/
+
+const char rootCa[] = "-----BEGIN CERTIFICATE-----\n"\
+"MIIDpzCCAo+gAwIBAgIJAKpi3Twp+3KZMA0GCSqGSIb3DQEBDQUAMGoxFzAVBgNV\n" \
+"BAMMDkFuIE1RVFQgYnJva2VyMRYwFAYDVQQKDA1Pd25UcmFja3Mub3JnMRQwEgYD\n" \
+"VQQLDAtnZW5lcmF0ZS1DQTEhMB8GCSqGSIb3DQEJARYSbm9ib2R5QGV4YW1wbGUu\n" \
+"bmV0MB4XDTE3MTIyOTEyNDA0OFoXDTMyMTIyNTEyNDA0OFowajEXMBUGA1UEAwwO\n" \
+"QW4gTVFUVCBicm9rZXIxFjAUBgNVBAoMDU93blRyYWNrcy5vcmcxFDASBgNVBAsM\n" \
+"C2dlbmVyYXRlLUNBMSEwHwYJKoZIhvcNAQkBFhJub2JvZHlAZXhhbXBsZS5uZXQw\n" \
+"ggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDLaygszeT1/VflbZpeRNte\n" \
+"InKn1ZfdnbBIBiYYpq6yzBebJhw6d2optQ8VesBrcs0/3YDo5D/N9VhWp6/xLn3Y\n" \
+"phxFaXY4JZvYv5WkObfci1eLUZdIB/Z4fTQqbhFLFs/2QfF0xTIySdBifGPyvwNn\n" \
+"/Z5IGjkh62lmzg4xkIVTubmaOUtxnSfHv3nSVQnGSIMvsXlvi2HRDbGrSdiwfre9\n" \
+"J/zWn8HEu/M+RFmTeStL7iOTNFWkNS7pAunx7BgkjR5C/yu6pkB1GNgVNQ2+ZA/J\n" \
+"lJNhf2qj+wVhx2MIt/lhELyybBLr8vdDVy5iV0Le2OLTzYfwiEJr+wSrnnoWmuOr\n" \
+"AgMBAAGjUDBOMB0GA1UdDgQWBBQy58AtEHQ0mbbrU1zcdnEGIxYkOzAfBgNVHSME\n" \
+"GDAWgBQy58AtEHQ0mbbrU1zcdnEGIxYkOzAMBgNVHRMEBTADAQH/MA0GCSqGSIb3\n" \
+"DQEBDQUAA4IBAQAw/tY2cTJGiUkZ49YUFBVu/Mepu4TRFvNamENMKuHxsqDGkYF+\n" \
+"VSt4WvDa0MflV96HX9ssJFXWdFd5MeYAa/wjN3H8HdetqdVAxFMfhaMaRgNUYwM5\n" \
+"BnI4Ney3EHECNMJLq6jcNdypdbs0/LyLcML30FhXf4tCcV9BnjJsUNG5mBCeSx+l\n" \
+"RQHSyoNSeP9jiMJbsI4QnuWXKyttWg7QgpuXH9MTXGyrfBC/feZMcNALPCdJNjj9\n" \
+"CbPWnc85uFyXkTPV1kq2EL1qOApHhqRTE7PkT32JZvoSLEEr1vCh9TJ3MwctEZT5\n" \
+"XG8uNkqgvhlAgEJ/1V1MryBPRqNbm5gXo0Yq\n" \
 "-----END CERTIFICATE-----\n";
 
 const size_t rootCaSize = sizeof(rootCa);

@@ -84,7 +84,6 @@ static void OnOperationComplete(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_RES
         case MQTT_CLIENT_ON_CONNACK:
         {
             PRINTF("ConnAck function called\r\n");
-
             SUBSCRIBE_PAYLOAD subscribe;
             subscribe.subscribeTopic = TOPIC_NAME_A;
             subscribe.qosReturn = DELIVER_EXACTLY_ONCE;
@@ -198,7 +197,7 @@ void prvMQTTEchoTask(void *pvParameters)
 #else
     TLSIO_CONFIG tlsConfig;
     memset(&tlsConfig, 0, sizeof(TLSIO_CONFIG));
-    tlsConfig.hostname = "192.168.1.19";
+    tlsConfig.hostname = "192.168.1.27";
     tlsConfig.port = 8883;
     XIO_HANDLE mqttXioHandle = xio_create(tlsio_mbedtls_get_interface_description(), (void *)&tlsConfig);
     xio_setoption(mqttXioHandle, OPTION_TRUSTED_CERT, (void*)&rootCa);

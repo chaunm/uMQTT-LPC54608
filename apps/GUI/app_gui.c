@@ -91,21 +91,61 @@ void APP_GUI_Init()
 
 int APP_GUI_printf(const char* string, ...)
 {
-    char* displayString = (char*)malloc(1024);
+    char* displayString;
+    char* lcdString;
+    int i, line, lineCount, dispLength, pos;
+    memset(displayString, 0, 1024);
     va_list ap;
     va_start(ap, string);
     vsprintf(displayString, string, ap);
     va_end(ap);
-    int line;
+    dispLength = strlen(displayString);
+    if (dispLength > 1024)
+    	return -1;
+    displayString = (char*)malloc(1024);
     line = GUI_GetDispPosY();
-    if (line >= LCD_HEIGHT - APP_GUI_FONT_H)
+    if (dispLength <= GUI_BIDI_MAX_CHARS_PER_LINE)
     {
-        WM_Exec();
-        GUI_Clear();
-        GUI_GotoXY(0,0);
+    	if (line >= LCD_HEIGHT - APP_GUI_FONT_H)
+    	{
+    		WM_Exec();
+    		GUI_Clear();
+    		GUI_GotoXY(0,0);
+    	}
+    	GUI_DispString(displayString);
+    	WM_Exec();
     }
-    GUI_DispString(displayString);
-    WM_Exec();
+    else
+    {
+    	lineCount = dispLength / GUI_BIDI_MAX_CHARS_PER_LINE;
+    	if ((dispLength % GUI_BIDI_MAX_CHARS_PER_LINE) > 0)
+    		dispLength++;
+    	if (line >= LCD_HEIGHT - (APP_GUI_FONT_H * lineCount))
+    	{
+    		WM_Exec();
+    		GUI_Clear();
+    		GUI_GotoXY(0,0);
+    	}
+    	lcdString = (char*)malloc(GUI_BIDI_MAX_CHARS_PER_LINE + 1);
+    	pos = 0;
+    	while (dispLength > 0)
+    	{
+    		i = 0;
+    		memset(lcdString, 0, GUI_BIDI_MAX_CHARS_PER_LINE + 1);
+    		while ((i < GUI_BIDI_MAX_CHARS_PER_LINE) && (dispLength > 0))
+    		{
+    			lcdString[i] = displayString[i + pos];
+    			i++;
+    			dispLength--;
+    		}
+    		pos += i;
+    		GUI_DispString(lcdString);
+    		if (dispLength > 0)
+    			GUI_DispNextLine();
+    	}
+    	WM_Exec();
+    	free(lcdString);
+    }
     free(displayString);
     return 0;
 }

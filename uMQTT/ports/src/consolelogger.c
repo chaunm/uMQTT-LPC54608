@@ -4,6 +4,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <time.h>
+#include <stdlib.h>
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/consolelogger.h"
 #include "fsl_debug_console.h"

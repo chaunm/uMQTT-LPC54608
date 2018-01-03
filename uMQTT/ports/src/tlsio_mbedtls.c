@@ -319,7 +319,7 @@ static int tlsio_entropy_poll(void *v, unsigned char *output, size_t len, size_t
 
 static void mbedtls_init(void *instance, const char *host) {
     TLS_IO_INSTANCE *result = (TLS_IO_INSTANCE *)instance;
-    char *pers = "azure_iot_client";
+    char *pers = "raspberrypi";
 
     // mbedTLS initialize...
     mbedtls_threading_set_alt( mutex_init_alt, mutex_free_alt,
