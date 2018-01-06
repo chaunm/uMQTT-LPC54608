@@ -29,6 +29,7 @@ static const char* APP_NAME_A = "This is the app msg A.";
 
 static uint16_t PACKET_ID_VALUE = 11;
 static bool g_continue = true;
+static bool g_error	= false;
 
 static int ActorPublish(MQTT_CLIENT_HANDLE mqtt_client, const char* topic, const char* message, size_t size, uint8_t qos)
 {
@@ -83,6 +84,7 @@ static void OnOperationComplete(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_RES
     {
         case MQTT_CLIENT_ON_CONNACK:
         {
+        	g_error = false;
             PRINTF("ConnAck function called\r\n");
             SUBSCRIBE_PAYLOAD subscribe;
             subscribe.subscribeTopic = TOPIC_NAME_A;
@@ -166,6 +168,9 @@ static void OnErrorComplete(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ERROR e
     case MQTT_CLIENT_NO_PING_RESPONSE:
     case MQTT_CLIENT_UNKNOWN_ERROR:
         g_continue = false;
+        g_error = true;
+        PRINTF("Callback - MQTT Error Code: %d\n", error);
+        vTaskDelay(pdMS_TO_TICKS(1000));
         break;
     }
 }
@@ -188,7 +193,7 @@ void prvMQTTEchoTask(void *pvParameters)
     mqttOptions.willMessage = NULL;
     mqttOptions.username = NULL;
     mqttOptions.password = NULL;
-    mqttOptions.keepAliveInterval = 10;
+    mqttOptions.keepAliveInterval = 30; // keep alive interval should be >= 30 due to internal mqtt_client.c process
     mqttOptions.useCleanSession = true;
     mqttOptions.qualityOfServiceValue = DELIVER_EXACTLY_ONCE;
 #if !(MQTT_USE_TLS)
@@ -204,16 +209,39 @@ void prvMQTTEchoTask(void *pvParameters)
     xio_setoption(mqttXioHandle, OPTION_X509_ECC_KEY, (void*)&privateKey);
     xio_setoption(mqttXioHandle, OPTION_X509_ECC_CERT, (void*)&clientCert);
 #endif // !defined(MQTT_USE_TLS)
-    if (mqtt_client_connect(mqttHandle, mqttXioHandle, &mqttOptions) != 0)
+    while (mqtt_client_connect(mqttHandle, mqttXioHandle, &mqttOptions) != 0)
     {
     	PRINTF("mqtt_client_connect failed\n");
+    	vTaskDelay(pdMS_TO_TICKS(5000));
     }
-    else
+
     {
     	PRINTF("mqtt_client_connect success\n");
-    	while (g_continue)
+    	g_continue = true;
+    	while (1)
     	{
-    		mqtt_client_dowork(mqttHandle);
+    		if (g_continue)
+    		{
+    			mqtt_client_dowork(mqttHandle);
+    		}
+    		else
+    		{
+    			xio_destroy(mqttXioHandle);
+#if(!MQTT_USE_TLS)
+    			mqttXioHandle = xio_create(socketio_get_interface_description(), &socketConfig);
+#else
+    			mqttXioHandle = xio_create(tlsio_mbedtls_get_interface_description(), (void *)&tlsConfig);
+    			xio_setoption(mqttXioHandle, OPTION_TRUSTED_CERT, (void*)&rootCa);
+    			xio_setoption(mqttXioHandle, OPTION_X509_ECC_KEY, (void*)&privateKey);
+    			xio_setoption(mqttXioHandle, OPTION_X509_ECC_CERT, (void*)&clientCert);
+#endif
+    			while (mqtt_client_connect(mqttHandle, mqttXioHandle, &mqttOptions) != 0)
+    				vTaskDelay(pdMS_TO_TICKS(5000));
+    			if (!g_error)
+    				g_continue = true;
+    			else
+    				vTaskDelay(pdMS_TO_TICKS(5000));
+    		}
     	}
     }
     vTaskDelete(NULL);

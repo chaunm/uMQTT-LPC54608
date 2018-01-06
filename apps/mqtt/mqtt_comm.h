@@ -9,6 +9,12 @@
 #define MQTT_MQTT_COMM_H_
 
 #include "azure_umqtt_c/mqtt_client.h"
+
+enum MQTT_COMMUNICATOR_STATUS {
+	MQTT_CONNECT = 0,
+	MQTT_DISCONNECT,
+	MQTT_CONNECTING
+};
 typedef struct MQTT_COMMUNICATOR_TAG
 {
 	MQTT_CLIENT_HANDLE 	mqttHandle;
@@ -24,7 +30,7 @@ typedef struct MQTT_COMMUNICATOR_TAG
 	size_t 	clientCertSize;
 	size_t 	privateKeySize;
 	uint16_t packetId;
-	bool connected;
+	uint8_t state;
 } MQTT_COMMUNICATOR, *MQTT_COMMUNICATOR_HANDLE;
 
 MQTT_COMMUNICATOR_HANDLE MQTT_Comm_Create();

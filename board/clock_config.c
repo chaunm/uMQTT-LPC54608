@@ -116,4 +116,6 @@ void BOARD_BootClockPLL180M(void)
     POWER_SetVoltageForFreq(180000000U);             /*!< Set voltage for the one of the fastest clock outputs: System clock output */
     CLOCK_SetFLASHAccessCyclesForFreq(180000000U);   /*!< Set FLASH wait states for core */
     CLOCK_AttachClk(kSYS_PLL_to_MAIN_CLK);           /*!< Switch System clock to SYS PLL 180MHz */
+    SystemCoreClockUpdate();
+    SystemCoreClock = 180000000U;
 }

@@ -368,6 +368,7 @@ CONCRETE_IO_HANDLE tlsio_mbedtls_create(void* io_create_parameters)
         result = malloc(sizeof(TLS_IO_INSTANCE));
         if (result != NULL)
         {
+        	memset(result, 0, sizeof(TLS_IO_INSTANCE)); // chaunm
             SOCKETIO_CONFIG socketio_config;
             const IO_INTERFACE_DESCRIPTION* underlying_io_interface;
             void* io_interface_parameters;

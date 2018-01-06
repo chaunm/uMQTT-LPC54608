@@ -94,6 +94,7 @@ int APP_GUI_printf(const char* string, ...)
     char* displayString;
     char* lcdString;
     int i, line, lineCount, dispLength, pos;
+    displayString = (char*)malloc(1024);
     memset(displayString, 0, 1024);
     va_list ap;
     va_start(ap, string);
@@ -101,8 +102,11 @@ int APP_GUI_printf(const char* string, ...)
     va_end(ap);
     dispLength = strlen(displayString);
     if (dispLength > 1024)
+    {
+    	free(displayString);
     	return -1;
-    displayString = (char*)malloc(1024);
+    }
+
     line = GUI_GetDispPosY();
     if (dispLength <= GUI_BIDI_MAX_CHARS_PER_LINE)
     {
@@ -137,10 +141,12 @@ int APP_GUI_printf(const char* string, ...)
     			lcdString[i] = displayString[i + pos];
     			i++;
     			dispLength--;
+    			if (lcdString[i - 1] == '\n')
+    				break;
     		}
     		pos += i;
     		GUI_DispString(lcdString);
-    		if (dispLength > 0)
+    		if ((dispLength > 0))
     			GUI_DispNextLine();
     	}
     	WM_Exec();

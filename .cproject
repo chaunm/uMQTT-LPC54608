@@ -752,7 +752,7 @@
 					</folderInfo>
 					<sourceEntries>
 						<entry flags="LOCAL|VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="CMSIS"/>
-						<entry excluding="mqtt/MQTTEcho2.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="apps"/>
+						<entry excluding="mqtt/mqtt_comm.c|mqtt/MQTTEcho2.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="apps"/>
 						<entry flags="LOCAL|VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="board"/>
 						<entry flags="LOCAL|VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="drivers"/>
 						<entry flags="LOCAL|VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="emwin"/>
@@ -1683,14 +1683,14 @@
 		<configuration configurationName="Debug SSL">
 			<resource resourceType="PROJECT" workspacePath="/lwipMQTT"/>
 		</configuration>
-		<configuration configurationName="Debug">
-			<resource resourceType="PROJECT" workspacePath="/lwipMQTT"/>
-		</configuration>
 		<configuration configurationName="Release">
 			<resource resourceType="PROJECT" workspacePath="/lwipMQTT"/>
 		</configuration>
 		<configuration configurationName="Debug_SSL_EXT">
 			<resource resourceType="PROJECT" workspacePath="/uMQTT"/>
+		</configuration>
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/lwipMQTT"/>
 		</configuration>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>

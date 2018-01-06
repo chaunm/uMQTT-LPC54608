@@ -692,7 +692,7 @@ int mallocAndStrcpy_s(char** destination, const char* source)
     {
         size_t l = strlen(source);
         char* temp = (char*)malloc(l + 1);
-        
+        memset(temp, 0, l + 1); // chaunm - initialize 0 memory before use
         /*Codes_SRS_CRT_ABSTRACTIONS_99_037: [Upon failure to allocate memory for the destination, the function will return ENOMEM.]*/
         if (temp == NULL)
         {

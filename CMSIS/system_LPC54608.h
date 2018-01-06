@@ -82,7 +82,7 @@ extern "C" {
 #define CLK_FRO_12MHZ                  12000000u           /* FRO 12 MHz (fro_12m) */
 #define CLK_FRO_48MHZ                  48000000u           /* FRO 48 MHz (fro_48m) */
 #define CLK_FRO_96MHZ                  96000000u           /* FRO 96 MHz (fro_96m) */
-#define CLK_CLK_IN                            0u           /* Default CLK_IN pin clock */
+#define CLK_CLK_IN                     12000000u           /* Default CLK_IN pin clock */
 
 
 /**
