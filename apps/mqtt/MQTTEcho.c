@@ -179,6 +179,15 @@ void prvMQTTEchoTask(void *pvParameters)
 {
     /* connect to m2m.eclipse.org, subscribe to a topic, send and receive messages regularly every 1 sec */
     MQTT_CLIENT_HANDLE mqttHandle;
+    TLSIO_CERT_INSTANCE rootCaHandle;
+    TLSIO_CERT_INSTANCE clientCertHandle;
+    TLSIO_KEY_INSTANCE	privateKeyHandle;
+    rootCaHandle.certs = rootCa;
+    rootCaHandle.certsSize = rootCaSize;
+    clientCertHandle.certs = clientCert;
+    clientCertHandle.certsSize = clientCertSize;
+    privateKeyHandle.key = privateKey;
+    privateKeyHandle.keySize = privateKeySize;
     uint32_t taskNotifyValue;
     if (xTaskNotifyWait(0x01, 0x01, &taskNotifyValue, portMAX_DELAY) == pdFALSE)
     {
@@ -205,9 +214,10 @@ void prvMQTTEchoTask(void *pvParameters)
     tlsConfig.hostname = "192.168.1.27";
     tlsConfig.port = 8883;
     XIO_HANDLE mqttXioHandle = xio_create(tlsio_mbedtls_get_interface_description(), (void *)&tlsConfig);
-    xio_setoption(mqttXioHandle, OPTION_TRUSTED_CERT, (void*)&rootCa);
-    xio_setoption(mqttXioHandle, OPTION_X509_ECC_KEY, (void*)&privateKey);
-    xio_setoption(mqttXioHandle, OPTION_X509_ECC_CERT, (void*)&clientCert);
+    xio_setoption(mqttXioHandle, OPTION_TRUSTED_CERT, (void*)&rootCaHandle);
+    xio_setoption(mqttXioHandle, OPTION_X509_ECC_CERT, (void*)&clientCertHandle);
+    xio_setoption(mqttXioHandle, OPTION_X509_ECC_KEY, (void*)&privateKeyHandle);
+
 #endif // !defined(MQTT_USE_TLS)
     while (mqtt_client_connect(mqttHandle, mqttXioHandle, &mqttOptions) != 0)
     {
@@ -227,20 +237,25 @@ void prvMQTTEchoTask(void *pvParameters)
     		else
     		{
     			xio_destroy(mqttXioHandle);
+    			mqtt_client_deinit(mqttHandle);
+    			mqttHandle = mqtt_client_init(OnRecvCallback, OnOperationComplete, (void*)(&mqttHandle), OnErrorComplete, (void*)(&mqttHandle));
+    			if (mqttHandle == NULL)
+    				vTaskDelete(NULL);
 #if(!MQTT_USE_TLS)
     			mqttXioHandle = xio_create(socketio_get_interface_description(), &socketConfig);
 #else
     			mqttXioHandle = xio_create(tlsio_mbedtls_get_interface_description(), (void *)&tlsConfig);
-    			xio_setoption(mqttXioHandle, OPTION_TRUSTED_CERT, (void*)&rootCa);
-    			xio_setoption(mqttXioHandle, OPTION_X509_ECC_KEY, (void*)&privateKey);
-    			xio_setoption(mqttXioHandle, OPTION_X509_ECC_CERT, (void*)&clientCert);
+    			xio_setoption(mqttXioHandle, OPTION_TRUSTED_CERT, (void*)&rootCaHandle);
+    			xio_setoption(mqttXioHandle, OPTION_X509_ECC_KEY, (void*)&privateKeyHandle);
+    			xio_setoption(mqttXioHandle, OPTION_X509_ECC_CERT, (void*)&clientCertHandle);
 #endif
     			while (mqtt_client_connect(mqttHandle, mqttXioHandle, &mqttOptions) != 0)
-    				vTaskDelay(pdMS_TO_TICKS(5000));
-    			if (!g_error)
-    				g_continue = true;
-    			else
-    				vTaskDelay(pdMS_TO_TICKS(5000));
+    				vTaskDelay(pdMS_TO_TICKS(10000));
+    			g_continue = true;
+//    			if (!g_error)
+//    				g_continue = true;
+//    			else
+//    				vTaskDelay(pdMS_TO_TICKS(5000));
     		}
     	}
     }

@@ -146,7 +146,7 @@ int APP_GUI_printf(const char* string, ...)
     		}
     		pos += i;
     		GUI_DispString(lcdString);
-    		if ((dispLength > 0))
+    		if ((dispLength > 0) && (lcdString[i - 1] != '\n'))
     			GUI_DispNextLine();
     	}
     	WM_Exec();

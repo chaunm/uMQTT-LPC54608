@@ -76,9 +76,9 @@ typedef struct TLS_IO_INSTANCE_TAG
     mbedtls_x509_crt 		   client_certificates_parsed; // chaunm added
     mbedtls_pk_context		   client_private_key_parsed; //chaunm added
     mbedtls_ssl_session        ssn;
-    char*                      trusted_certificates;
-    char* 					   client_certificates;
-    char*					   client_private_key;
+    const char*                trusted_certificates;
+    const char* 		   	   client_certificates;
+    const char*				   client_private_key;
     size_t 					   trusted_certificates_size;
     size_t					   client_certificates_size;
     size_t  				   client_private_key_size;
@@ -459,10 +459,22 @@ void tlsio_mbedtls_destroy(CONCRETE_IO_HANDLE tls_io)
         }
 
         xio_destroy(tls_io_instance->socket_io);
+        // use static memory, no more free - chaunm
+        /*
         if (tls_io_instance->trusted_certificates != NULL)
         {
             free(tls_io_instance->trusted_certificates);
         }
+        // chaunm
+        if (tls_io_instance->client_certificates != NULL)
+        {
+        	free(tls_io_instance->client_certificates);
+        }
+        if (tls_io_instance->client_private_key != NULL)
+        {
+        	free(tls_io_instance->client_private_key);
+        }
+        */
         free(tls_io);
     }
 }
@@ -720,6 +732,7 @@ OPTIONHANDLER_HANDLE tlsio_mbedtls_retrieveoptions(CONCRETE_IO_HANDLE handle)
 
 int tlsio_mbedtls_setoption(CONCRETE_IO_HANDLE tls_io, const char* optionName, const void* value)
 {
+	// change to use static memory to avoid alloc large memory --> reduce memory usage - chaunm
     int result;
 
     if (tls_io == NULL || optionName == NULL)
@@ -734,17 +747,21 @@ int tlsio_mbedtls_setoption(CONCRETE_IO_HANDLE tls_io, const char* optionName, c
             if (tls_io_instance->trusted_certificates != NULL)
             {
                 // Free the memory if it has been previously allocated
-                free(tls_io_instance->trusted_certificates);
+//                free(tls_io_instance->trusted_certificates);
                 tls_io_instance->trusted_certificates = NULL;
             }
-            if (mallocAndStrcpy_s(&tls_io_instance->trusted_certificates, (const char*)value) != 0)
+//            if (mallocAndStrcpy_s(&tls_io_instance->trusted_certificates, (const char*)value) != 0)
+//            {
+//                LogError("unable to mallocAndStrcpy_s");
+//                result = __FAILURE__;
+//            }
+//            else
+            TLSIO_CERT_INSTANCE* caCert = (TLSIO_CERT_INSTANCE*) value;
+            tls_io_instance->trusted_certificates = caCert->certs;
+            tls_io_instance->trusted_certificates_size = caCert->certsSize;
             {
-                LogError("unable to mallocAndStrcpy_s");
-                result = __FAILURE__;
-            }
-            else
-            {
-                int parse_result = mbedtls_x509_crt_parse(&tls_io_instance->trusted_certificates_parsed, (const unsigned char *)value, (int)(strlen(value) + 1));
+//                int parse_result = mbedtls_x509_crt_parse(&tls_io_instance->trusted_certificates_parsed, (const unsigned char *)value, (int)(strlen(value) + 1));
+            	int parse_result = mbedtls_x509_crt_parse(&tls_io_instance->trusted_certificates_parsed, (const unsigned char *)caCert->certs, caCert->certsSize);
                 if (parse_result != 0)
                 {
                     LogInfo("Malformed pem certificate");
@@ -762,17 +779,22 @@ int tlsio_mbedtls_setoption(CONCRETE_IO_HANDLE tls_io, const char* optionName, c
         {
         	if (tls_io_instance->client_certificates != NULL)
         	{
-        		free(tls_io_instance->client_certificates);
+//        		free(tls_io_instance->client_certificates);
         		tls_io_instance->client_certificates = NULL;
         	}
-        	if (mallocAndStrcpy_s(&tls_io_instance->client_certificates, (const char*)value) != 0)
+//        	if (mallocAndStrcpy_s(&tls_io_instance->client_certificates, (const char*)value) != 0)
+//        	{
+//        		LogError("unable to mallocAndStrcpy_s");
+//        		result = __FAILURE__;
+//        	}
+//        	else
+
+        	TLSIO_CERT_INSTANCE* clientCert = (TLSIO_CERT_INSTANCE*)value;
+        	tls_io_instance->client_certificates = clientCert->certs;
+        	tls_io_instance->client_certificates_size = clientCert->certsSize;
         	{
-        		LogError("unable to mallocAndStrcpy_s");
-        		result = __FAILURE__;
-        	}
-        	else
-        	{
-        		int parse_result = mbedtls_x509_crt_parse(&tls_io_instance->client_certificates_parsed, (const unsigned char *)value, (int)(strlen(value) + 1));
+//        		int parse_result = mbedtls_x509_crt_parse(&tls_io_instance->client_certificates_parsed, (const unsigned char *)value, (int)(strlen(value) + 1));
+        		int parse_result = mbedtls_x509_crt_parse(&tls_io_instance->client_certificates_parsed, (const unsigned char *)clientCert->certs, clientCert->certsSize);
         		if (parse_result != 0)
         		{
         			LogInfo("Malformed pem certificate");
@@ -793,17 +815,21 @@ int tlsio_mbedtls_setoption(CONCRETE_IO_HANDLE tls_io, const char* optionName, c
         {
         	if (tls_io_instance->client_private_key != NULL)
         	{
-        		free(tls_io_instance->client_private_key);
+//        		free(tls_io_instance->client_private_key);
         		tls_io_instance->client_private_key = NULL;
         	}
-        	if (mallocAndStrcpy_s(&tls_io_instance->client_private_key, (const char*)value) != 0)
+//        	if (mallocAndStrcpy_s(&tls_io_instance->client_private_key, (const char*)value) != 0)
+//        	{
+//        		LogError("unable to mallocAndStrcpy_s");
+//        		result = __FAILURE__;
+//        	}
+//        	else
+        	TLSIO_KEY_INSTANCE* privateKey = (TLSIO_KEY_INSTANCE*)value;
+        	tls_io_instance->client_private_key = privateKey->key;
+        	tls_io_instance->client_private_key_size = privateKey->keySize;
         	{
-        		LogError("unable to mallocAndStrcpy_s");
-        		result = __FAILURE__;
-        	}
-        	else
-        	{
-        		int parse_result = mbedtls_pk_parse_key(&tls_io_instance->client_private_key_parsed, (const unsigned char *)value, (int)(strlen(value) + 1), NULL, 0);
+//        		int parse_result = mbedtls_pk_parse_key(&tls_io_instance->client_private_key_parsed, (const unsigned char *)value, (int)(strlen(value) + 1), NULL, 0);
+        		int parse_result = mbedtls_pk_parse_key(&tls_io_instance->client_private_key_parsed, (const unsigned char *)privateKey->key, privateKey->keySize, NULL, 0);
         		if (parse_result != 0)
         		{
         			LogInfo("Malformed pem certificate");

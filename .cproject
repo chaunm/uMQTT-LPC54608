@@ -1144,9 +1144,12 @@
 							<tool id="com.crt.advproject.link.exe.debug.1220567300" name="MCU Linker" superClass="com.crt.advproject.link.exe.debug.1387968006"/>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="com.crt.advproject.config.exe.debug.1853231611.1548099439.590640704.2131769696" name="mqtt_comm.c" rcbsApplicability="disable" resourcePath="apps/mqtt/mqtt_comm.c" toolsToInvoke="com.crt.advproject.gcc.exe.debug.184591387.569731186">
+						<tool id="com.crt.advproject.gcc.exe.debug.184591387.569731186" name="MCU C Compiler" superClass="com.crt.advproject.gcc.exe.debug.184591387"/>
+					</fileInfo>
 					<sourceEntries>
 						<entry flags="LOCAL|VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="CMSIS"/>
-						<entry excluding="mqtt/MQTTEcho2.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="apps"/>
+						<entry excluding="mqtt/mqtt_comm.c|mqtt/MQTTEcho2.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="apps"/>
 						<entry flags="LOCAL|VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="board"/>
 						<entry flags="LOCAL|VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="drivers"/>
 						<entry flags="LOCAL|VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="emwin"/>
