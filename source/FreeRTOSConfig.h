@@ -85,7 +85,7 @@
 #define configUSE_PREEMPTION                    1
 #define configUSE_TICKLESS_IDLE                 0
 #define configCPU_CLOCK_HZ                      (SystemCoreClock)
-#define configTICK_RATE_HZ                      ((TickType_t)200)
+#define configTICK_RATE_HZ                      ((TickType_t)1000)
 #define CONFIG_FREERTOS_HZ						configTICK_RATE_HZ // added for using with UMQTT - chaunm
 #define configMAX_PRIORITIES                    5
 #define configMINIMAL_STACK_SIZE                ((unsigned short)90)
@@ -108,7 +108,7 @@
 /* Memory allocation related definitions. */
 #define configSUPPORT_STATIC_ALLOCATION         0
 #define configSUPPORT_DYNAMIC_ALLOCATION        1
-#define configTOTAL_HEAP_SIZE                   ((size_t)(0x10000))
+#define configTOTAL_HEAP_SIZE                   ((size_t)(0x8000))
 #define configAPPLICATION_ALLOCATED_HEAP        0
 
 /* Hook function related definitions. */

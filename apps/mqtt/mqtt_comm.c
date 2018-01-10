@@ -5,71 +5,40 @@
  *      Author: A83571
  */
 
+#include <stdlib.h>
 #include "mqtt_comm.h"
+#include "azure_c_shared_utility/socketio.h"
+#include "azure_c_shared_utility/tlsio.h"
+#include "azure_c_shared_utility/shared_util_options.h"
 
-static int MQTT_Comm_Publish(MQTT_COMMUNICATOR_HANDLE mqtt_comm, const char* topic, const char* message, size_t size, uint8_t qos)
+
+static void Mqtt_Comm_OnRecvCallback(MQTT_MESSAGE_HANDLE  msgHandle, void* context)
 {
-	// check for input param
-	if ((mqtt_comm == NULL) || (mqtt_comm->mqttHandle == NULL) || (mqtt_comm->connected == false) ||
-			(topic == NULL) || (message == NULL))
-	{
-		return -1;
-	}
-	MQTT_MESSAGE_HANDLE msg = mqttmessage_create(mqtt_comm->packetId, topic, qos, (const uint8_t*)message, size);
-	if (msg == NULL)
-		return -1;
-	if (mqtt_client_publish(mqtt_comm->mqttHandle, msg) != 0)
-	{
-		mqttmessage_destroy(msg);
-		return -1;
-	}
-	else
-	{
-		mqttmessage_destroy(msg);
-		return 0;
-	}
+	MQTT_COMMUNICATOR_HANDLE mqtt_comm = (MQTT_COMMUNICATOR_HANDLE)context;
+	if (mqtt_comm->fnReceivedCallback != NULL)
+		mqtt_comm->fnReceivedCallback(msgHandle);
 }
 
-static void MQTT_Comm_OnOperationComplete(MQTT_COMMUNICATOR_HANDLE mqtt_comm, MQTT_CLIENT_EVENT_RESULT actionResult, const void* msgInfo, void* callbackCtx)
+static void MQTT_Comm_OnOperationComplete(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_RESULT actionResult, const void* msgInfo, void* callbackCtx)
 {
-	MQTT_CLIENT_HANDLE handle = mqtt_comm->mqttHandle;
-    (void)msgInfo;
-    (void)callbackCtx;
+//    (void)msgInfo;
+//    (void)callbackCtx;
+	MQTT_COMMUNICATOR_HANDLE mqtt_comm = (MQTT_COMMUNICATOR_HANDLE)callbackCtx;
     switch (actionResult)
     {
         case MQTT_CLIENT_ON_CONNACK:
         {
+        	mqtt_comm->state = MQTT_CONNECTED;
+        	if (mqtt_comm->fnConnectedCallback != NULL)
+        		mqtt_comm->fnConnectedCallback(callbackCtx);
             PRINTF("ConnAck function called\r\n");
-            SUBSCRIBE_PAYLOAD subscribe;
-            subscribe.subscribeTopic = TOPIC_NAME_A;
-            subscribe.qosReturn = DELIVER_EXACTLY_ONCE;
-            if (mqtt_client_subscribe(handle, PACKET_ID_VALUE++, &subscribe, sizeof(subscribe) / sizeof(SUBSCRIBE_PAYLOAD)) != 0)
-            {
-                PRINTF("%d: mqtt_client_subscribe failed\r\n", __LINE__);
-                g_continue = false;
-            }
-            PRINTF("mqtt_client_subscribe success\r\n");
             break;
         }
         case MQTT_CLIENT_ON_SUBSCRIBE_ACK:
         {
         	PRINTF("mqtt subscribe ack received\n");
-            MQTT_MESSAGE_HANDLE msg = mqttmessage_create(PACKET_ID_VALUE++, TOPIC_NAME_A, DELIVER_EXACTLY_ONCE, (const uint8_t*)APP_NAME_A, strlen(APP_NAME_A));
-            if (msg == NULL)
-            {
-                PRINTF("%d: mqttmessage_create failed\r\n", __LINE__);
-                g_continue = false;
-            }
-            else
-            {
-                if (mqtt_client_publish(handle, msg))
-                {
-                    PRINTF("%d: mqtt_client_publish failed\r\n", __LINE__);
-                    g_continue = false;
-                }
-                mqttmessage_destroy(msg);
-            }
-            // Now send a message that will get
+        	if (mqtt_comm->fnSubCallback != NULL)
+        		mqtt_comm->fnSubCallback(callbackCtx);
             break;
         }
         case MQTT_CLIENT_ON_PUBLISH_ACK:
@@ -90,10 +59,12 @@ static void MQTT_Comm_OnOperationComplete(MQTT_COMMUNICATOR_HANDLE mqtt_comm, MQ
         case MQTT_CLIENT_ON_PUBLISH_COMP:
         {
         	PRINTF("MQTT Client publish finished\n");
+        	if (mqtt_comm->fnPubCallback != NULL)
+        		mqtt_comm->fnPubCallback(callbackCtx);
             break;
         }
         case MQTT_CLIENT_ON_DISCONNECT:
-            g_continue = false;
+        	mqtt_comm->state = MQTT_DISCONNECTED;
             break;
         case MQTT_CLIENT_ON_UNSUBSCRIBE_ACK:
         {
@@ -109,8 +80,9 @@ static void MQTT_Comm_OnOperationComplete(MQTT_COMMUNICATOR_HANDLE mqtt_comm, MQ
     }
 }
 
-static void OnErrorComplete(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ERROR error, void* callbackCtx)
+static void MQTT_Comm_OnErrorComplete(MQTT_CLIENT_HANDLE mqtt_handle, MQTT_CLIENT_EVENT_ERROR error, void* callbackCtx)
 {
+	MQTT_COMMUNICATOR_HANDLE mqtt_comm = (MQTT_COMMUNICATOR_HANDLE)callbackCtx;
     switch (error)
     {
     case MQTT_CLIENT_CONNECTION_ERROR:
@@ -119,16 +91,164 @@ static void OnErrorComplete(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ERROR e
     case MQTT_CLIENT_COMMUNICATION_ERROR:
     case MQTT_CLIENT_NO_PING_RESPONSE:
     case MQTT_CLIENT_UNKNOWN_ERROR:
-        g_continue = false;
+        mqtt_comm->state = MQTT_ERROR;
         PRINTF("MQTT Error Code: %d\n", error);
         break;
     }
 }
 
-MQTT_COMMUNICATOR_HANDLE MQTT_Comm_Create(const char* host, const char* port, const char* per,
-		bool security, const char* rootCa, const char* clientCrt, const char* )
+MQTT_COMMUNICATOR_HANDLE MQTT_Comm_Create(const char* host, int port, const char* clientId, const char* per,
+		const char* userName, const char* password,
+		bool security, const char* rootCa, const char* clientCrt, const char* privateKey, size_t rootCaSize, size_t clientCrtSize, size_t privKeySize)
 {
-	MQTT_COMMUNICATOR_HANDLE mqtt_comm = (MQTT_COMMUNICATOR_HANDLE)malloc(sizeof(MQTT_COMMUNICATOR));
-	if (mqtt_comm = NULL)
+	if ((host == NULL) || (port == 0))
 		return NULL;
+	if (security && ((rootCa == NULL) || (clientCrt == NULL) || (privateKey == NULL)))
+		return NULL;
+	MQTT_COMMUNICATOR_HANDLE mqtt_comm = (MQTT_COMMUNICATOR_HANDLE)malloc(sizeof(MQTT_COMMUNICATOR));
+	if (mqtt_comm == NULL)
+		return NULL;
+	memset(mqtt_comm, 0, sizeof(MQTT_COMMUNICATOR));
+	mqtt_comm->mqttHandle = mqtt_client_init(Mqtt_Comm_OnRecvCallback, MQTT_Comm_OnOperationComplete, (void*)(mqtt_comm), MQTT_Comm_OnErrorComplete, (void*)(mqtt_comm));
+	if (mqtt_comm->mqttHandle == NULL)
+	{
+		free(mqtt_comm);
+		return NULL;
+	}
+	mqtt_comm->host = host;
+	mqtt_comm->port = port;
+	mqtt_comm->mqttOptions.clientId = (char*)clientId;
+	mqtt_comm->mqttOptions.willMessage = NULL;
+	mqtt_comm->mqttOptions.username = (char*)userName;
+	mqtt_comm->mqttOptions.password = (char*)password;
+	mqtt_comm->mqttOptions.keepAliveInterval = 30; // keep alive interval should be >= 21 due to internal mqtt_client.c process
+	mqtt_comm->mqttOptions.useCleanSession = true;
+	mqtt_comm->mqttOptions.qualityOfServiceValue = DELIVER_EXACTLY_ONCE;
+	if (security)
+	{
+		memset(&mqtt_comm->xioConfigs.tlsConfig, 0, sizeof(TLSIO_CONFIG));
+		mqtt_comm->rootCa.certs = rootCa;
+		mqtt_comm->rootCa.certsSize = rootCaSize;
+		mqtt_comm->clientCert.certs = clientCrt;
+		mqtt_comm->clientCert.certsSize = clientCrtSize;
+		mqtt_comm->privateKey.key = privateKey;
+		mqtt_comm->privateKey.keySize = privKeySize;
+		mqtt_comm->xioConfigs.tlsConfig.hostname = mqtt_comm->host;
+		mqtt_comm->xioConfigs.tlsConfig.port = mqtt_comm->port;
+		mqtt_comm->xioHandle = xio_create(tlsio_mbedtls_get_interface_description(), (void *)&mqtt_comm->xioConfigs.tlsConfig);
+		if (mqtt_comm->xioHandle == NULL)
+		{
+			mqtt_client_deinit(mqtt_comm->mqttHandle);
+			free(mqtt_comm);
+			return(NULL);
+		}
+		xio_setoption(mqtt_comm->xioHandle, OPTION_TRUSTED_CERT, (void*)&mqtt_comm->rootCa);
+		xio_setoption(mqtt_comm->xioHandle, OPTION_X509_ECC_CERT, (void*)&mqtt_comm->clientCert);
+		xio_setoption(mqtt_comm->xioHandle, OPTION_X509_ECC_KEY, (void*)&mqtt_comm->privateKey);
+	}
+	else
+	{
+		mqtt_comm->xioConfigs.socketConfig.hostname = mqtt_comm->host;
+		mqtt_comm->xioConfigs.socketConfig.port = mqtt_comm->port;
+		mqtt_comm->xioConfigs.socketConfig.accepted_socket = NULL;
+		mqtt_comm->xioHandle = xio_create(socketio_get_interface_description(), &mqtt_comm->xioConfigs.socketConfig);
+		if (mqtt_comm->xioHandle == NULL)
+		{
+			mqtt_client_deinit(mqtt_comm->mqttHandle);
+		}
+	}
+	mqtt_comm->state = MQTT_DISCONNECTED;
+	mqtt_comm->packetId = 0;
+	return mqtt_comm;
 }
+
+void MQTT_Comm_Process(MQTT_COMMUNICATOR_HANDLE mqtt_comm)
+{
+	if (mqtt_comm == NULL)
+		vTaskDelete(NULL);
+	mqtt_comm->state = MQTT_CONNECTING;
+	while (mqtt_client_connect(mqtt_comm->mqttHandle, mqtt_comm->xioHandle, &mqtt_comm->mqttOptions) != 0)
+	{
+		PRINTF("mqtt_client_connect failed\n");
+		vTaskDelay(pdMS_TO_TICKS(5000));
+	}
+	PRINTF("mqtt_client_connect success\n");
+	mqtt_comm->state = MQTT_CONNECTED;
+	while (1)
+	{
+		switch(mqtt_comm->state)
+		{
+		case MQTT_CONNECTED:
+			mqtt_client_dowork(mqtt_comm->mqttHandle);
+			break;
+		case MQTT_ERROR:
+			xio_close(mqtt_comm->xioHandle, NULL, NULL);
+			xio_destroy(mqtt_comm->xioHandle);
+			if (mqtt_comm->security == 1)
+			{
+				mqtt_comm->xioHandle = xio_create(tlsio_mbedtls_get_interface_description(), (void *)&mqtt_comm->xioConfigs.tlsConfig);
+				xio_setoption(mqtt_comm->xioHandle, OPTION_TRUSTED_CERT, (void*)&mqtt_comm->rootCa);
+				xio_setoption(mqtt_comm->xioHandle, OPTION_X509_ECC_CERT, (void*)&mqtt_comm->clientCert);
+				xio_setoption(mqtt_comm->xioHandle, OPTION_X509_ECC_KEY, (void*)&mqtt_comm->privateKey);
+			}
+			else
+			{
+				mqtt_comm->xioHandle = xio_create(socketio_get_interface_description(), &mqtt_comm->xioConfigs.socketConfig);
+			}
+			mqtt_comm->state = MQTT_CONNECTING;
+			while (mqtt_client_connect(mqtt_comm->mqttHandle, mqtt_comm->xioHandle, &mqtt_comm->mqttOptions) != 0)
+				vTaskDelay(pdMS_TO_TICKS(5000));
+			mqtt_comm->state = MQTT_CONNECTED;
+			break;
+		case MQTT_DISCONNECTED:
+			xio_close(mqtt_comm->xioHandle,  NULL, NULL);
+			xio_destroy(mqtt_comm->xioHandle);
+			mqtt_client_deinit(mqtt_comm->mqttHandle);
+			free(mqtt_comm);
+			goto END_PROCESS;
+		default:
+			break;
+		}
+	}
+	END_PROCESS:
+	vTaskDelete(NULL);
+}
+
+int MQTT_Comm_Publish(MQTT_COMMUNICATOR_HANDLE mqtt_comm, const char* topic, const char* message, size_t size, uint8_t qos)
+{
+	// check for input param
+	if ((mqtt_comm == NULL) || (mqtt_comm->mqttHandle == NULL) || (mqtt_comm->state != MQTT_CONNECTED) ||
+			(topic == NULL) || (message == NULL))
+	{
+		return -1;
+	}
+	MQTT_MESSAGE_HANDLE msg = mqttmessage_create(mqtt_comm->packetId, topic, qos, (const uint8_t*)message, size);
+	if (msg == NULL)
+		return -1;
+	if (mqtt_client_publish(mqtt_comm->mqttHandle, msg) != 0)
+	{
+		mqttmessage_destroy(msg);
+		mqtt_comm->state = MQTT_ERROR;
+		return -1;
+	}
+	else
+	{
+		mqttmessage_destroy(msg);
+		return 0;
+	}
+}
+
+int MQTT_Comm_Subcribe(MQTT_COMMUNICATOR_HANDLE mqtt_comm, const char* topic, QOS_VALUE qos)
+{
+	SUBSCRIBE_PAYLOAD subscribe;
+	subscribe.subscribeTopic = topic;
+	subscribe.qosReturn = qos;
+	if (mqtt_client_subscribe(mqtt_comm->mqttHandle, mqtt_comm->packetId++, &subscribe, sizeof(subscribe) / sizeof(SUBSCRIBE_PAYLOAD)) != 0)
+	{
+		PRINTF("%d: mqtt_client_subscribe failed\r\n", __LINE__);
+		mqtt_comm->state = MQTT_ERROR;
+		return -1;
+	}
+	return 0;
+}
+

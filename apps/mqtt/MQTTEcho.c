@@ -236,11 +236,12 @@ void prvMQTTEchoTask(void *pvParameters)
     		}
     		else
     		{
+    			xio_close(mqttXioHandle, NULL, NULL);
     			xio_destroy(mqttXioHandle);
-    			mqtt_client_deinit(mqttHandle);
-    			mqttHandle = mqtt_client_init(OnRecvCallback, OnOperationComplete, (void*)(&mqttHandle), OnErrorComplete, (void*)(&mqttHandle));
-    			if (mqttHandle == NULL)
-    				vTaskDelete(NULL);
+//    			mqtt_client_deinit(mqttHandle);
+//    			mqttHandle = mqtt_client_init(OnRecvCallback, OnOperationComplete, (void*)(&mqttHandle), OnErrorComplete, (void*)(&mqttHandle));
+//    			if (mqttHandle == NULL)
+//    				vTaskDelete(NULL);
 #if(!MQTT_USE_TLS)
     			mqttXioHandle = xio_create(socketio_get_interface_description(), &socketConfig);
 #else
@@ -250,7 +251,7 @@ void prvMQTTEchoTask(void *pvParameters)
     			xio_setoption(mqttXioHandle, OPTION_X509_ECC_CERT, (void*)&clientCertHandle);
 #endif
     			while (mqtt_client_connect(mqttHandle, mqttXioHandle, &mqttOptions) != 0)
-    				vTaskDelay(pdMS_TO_TICKS(10000));
+    				vTaskDelay(pdMS_TO_TICKS(5000));
     			g_continue = true;
 //    			if (!g_error)
 //    				g_continue = true;
