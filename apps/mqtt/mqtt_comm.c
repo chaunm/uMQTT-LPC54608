@@ -16,7 +16,7 @@ static void Mqtt_Comm_OnRecvCallback(MQTT_MESSAGE_HANDLE  msgHandle, void* conte
 {
 	MQTT_COMMUNICATOR_HANDLE mqtt_comm = (MQTT_COMMUNICATOR_HANDLE)context;
 	if (mqtt_comm->fnReceivedCallback != NULL)
-		mqtt_comm->fnReceivedCallback(msgHandle);
+		mqtt_comm->fnReceivedCallback(mqtt_comm, msgHandle, mqtt_comm->recvCbContext);
 }
 
 static void MQTT_Comm_OnOperationComplete(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_RESULT actionResult, const void* msgInfo, void* callbackCtx)
@@ -30,7 +30,7 @@ static void MQTT_Comm_OnOperationComplete(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT
         {
         	mqtt_comm->state = MQTT_CONNECTED;
         	if (mqtt_comm->fnConnectedCallback != NULL)
-        		mqtt_comm->fnConnectedCallback(callbackCtx);
+        		mqtt_comm->fnConnectedCallback(mqtt_comm, mqtt_comm->connectedCbContext);
             PRINTF("ConnAck function called\r\n");
             break;
         }
@@ -38,7 +38,7 @@ static void MQTT_Comm_OnOperationComplete(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT
         {
         	PRINTF("mqtt subscribe ack received\n");
         	if (mqtt_comm->fnSubCallback != NULL)
-        		mqtt_comm->fnSubCallback(callbackCtx);
+        		mqtt_comm->fnSubCallback(mqtt_comm, mqtt_comm->subCbContext);
             break;
         }
         case MQTT_CLIENT_ON_PUBLISH_ACK:
@@ -60,7 +60,7 @@ static void MQTT_Comm_OnOperationComplete(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT
         {
         	PRINTF("MQTT Client publish finished\n");
         	if (mqtt_comm->fnPubCallback != NULL)
-        		mqtt_comm->fnPubCallback(callbackCtx);
+        		mqtt_comm->fnPubCallback(mqtt_comm, mqtt_comm->pubCbContext);
             break;
         }
         case MQTT_CLIENT_ON_DISCONNECT:
@@ -115,6 +115,7 @@ MQTT_COMMUNICATOR_HANDLE MQTT_Comm_Create(const char* host, int port, const char
 		free(mqtt_comm);
 		return NULL;
 	}
+	mqtt_comm->security = security;
 	mqtt_comm->host = host;
 	mqtt_comm->port = port;
 	mqtt_comm->mqttOptions.clientId = (char*)clientId;
@@ -165,7 +166,7 @@ MQTT_COMMUNICATOR_HANDLE MQTT_Comm_Create(const char* host, int port, const char
 void MQTT_Comm_Process(MQTT_COMMUNICATOR_HANDLE mqtt_comm)
 {
 	if (mqtt_comm == NULL)
-		vTaskDelete(NULL);
+		return;
 	mqtt_comm->state = MQTT_CONNECTING;
 	while (mqtt_client_connect(mqtt_comm->mqttHandle, mqtt_comm->xioHandle, &mqtt_comm->mqttOptions) != 0)
 	{
@@ -184,7 +185,7 @@ void MQTT_Comm_Process(MQTT_COMMUNICATOR_HANDLE mqtt_comm)
 		case MQTT_ERROR:
 			xio_close(mqtt_comm->xioHandle, NULL, NULL);
 			xio_destroy(mqtt_comm->xioHandle);
-			if (mqtt_comm->security == 1)
+			if (mqtt_comm->security == true)
 			{
 				mqtt_comm->xioHandle = xio_create(tlsio_mbedtls_get_interface_description(), (void *)&mqtt_comm->xioConfigs.tlsConfig);
 				xio_setoption(mqtt_comm->xioHandle, OPTION_TRUSTED_CERT, (void*)&mqtt_comm->rootCa);
@@ -211,7 +212,7 @@ void MQTT_Comm_Process(MQTT_COMMUNICATOR_HANDLE mqtt_comm)
 		}
 	}
 	END_PROCESS:
-	vTaskDelete(NULL);
+	return;
 }
 
 int MQTT_Comm_Publish(MQTT_COMMUNICATOR_HANDLE mqtt_comm, const char* topic, const char* message, size_t size, uint8_t qos)
@@ -250,5 +251,18 @@ int MQTT_Comm_Subcribe(MQTT_COMMUNICATOR_HANDLE mqtt_comm, const char* topic, QO
 		return -1;
 	}
 	return 0;
+}
+
+void MQTT_Comm_SetCallback(MQTT_COMMUNICATOR_HANDLE mqtt_comm, MQTT_COMM_ON_CONNECTED connectedCb, void* conCbContext, MQTT_COMM_ON_SUBCRIBE subCb, void* subCbContext,
+		MQTT_COMM_ON_RECEIVED recvCb, void* recvCbContext, MQTT_COMM_ON_PUBLISH pubCb, void* pubCbContext)
+{
+	mqtt_comm->fnConnectedCallback = connectedCb;
+	mqtt_comm->fnPubCallback = pubCb;
+	mqtt_comm->fnReceivedCallback = recvCb;
+	mqtt_comm->fnSubCallback = subCb;
+	mqtt_comm->connectedCbContext = conCbContext;
+	mqtt_comm->pubCbContext = pubCbContext;
+	mqtt_comm->subCbContext = subCbContext;
+	mqtt_comm->recvCbContext = recvCbContext;
 }
 

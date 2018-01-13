@@ -33,6 +33,7 @@
  * @brief   Application entry point.
  */
 #include <stdio.h>
+#include <stdlib.h>
 #include "board.h"
 #include "peripherals.h"
 #include "pin_mux.h"
@@ -44,6 +45,7 @@
 #include "network.h"
 #include "FreeRTOS.h"
 #include "MQTTEcho.h"
+#include "mqtt_app.h"
 /* TODO: insert other definitions and declarations here. */
 
 /*
@@ -73,8 +75,9 @@ int main(void) {
     if(sys_thread_new("lwip init", stack_init, NULL, INIT_THREAD_STACKSIZE, 3) == NULL)
     	LWIP_ASSERT("lwip init(): Task creation failed.", 0);
     // Create mqtt thread
-    xTaskCreate( prvMQTTEchoTask, "mqtt", 2048, NULL, 3, &xMqttThread );
-        PRINTF("Creat mqtt process @ task ID %p\n", xMqttThread);
+//    xTaskCreate( prvMQTTEchoTask, "mqtt", 2048, NULL, 3, &xMqttThread );
+    xTaskCreate( prvMqttAppTask, "mqtt", 2048, NULL, 3, &xMqttAppThread );
+    PRINTF("Creat mqtt process @ task ID %p\n", xMqttAppThread);
     /* RTOS task scheduler process */
     vTaskStartScheduler();
 

@@ -4,6 +4,7 @@
  *  Created on: Dec 12, 2017
  *      Author: A83571
  */
+#include <stdlib.h>
 #include <lwipopts1.h>
 #include "lwip/opt.h"
 #include "lwip/tcpip.h"
@@ -13,6 +14,8 @@
 #include "app_gui.h"
 #include "network.h"
 #include "MQTTEcho.h"
+#include "mqtt_app.h"
+
 void stack_init(void *arg)
 {
     static struct netif fsl_netif0;
@@ -56,7 +59,7 @@ void stack_init(void *arg)
     dns_init();
     PRINTF("Network stack setup finish\r\n");
 //    vTaskDelay(pdMS_TO_TICKS(1000));
-    if (xMqttThread != NULL)
-    	xTaskNotify(xMqttThread, 0x01, eNoAction);
+    if (xMqttAppThread != NULL)
+    	xTaskNotify(xMqttAppThread, 0x01, eNoAction);
     vTaskDelete(NULL);
 }
