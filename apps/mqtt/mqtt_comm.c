@@ -159,7 +159,7 @@ MQTT_COMMUNICATOR_HANDLE MQTT_Comm_Create(const char* host, int port, const char
 		}
 	}
 	mqtt_comm->state = MQTT_DISCONNECTED;
-	mqtt_comm->packetId = 0;
+	mqtt_comm->packetId = 1; // can not start first time subcribe when packet ID = 0
 	return mqtt_comm;
 }
 
@@ -170,7 +170,6 @@ void MQTT_Comm_Process(MQTT_COMMUNICATOR_HANDLE mqtt_comm)
 	mqtt_comm->state = MQTT_CONNECTING;
 	while (mqtt_client_connect(mqtt_comm->mqttHandle, mqtt_comm->xioHandle, &mqtt_comm->mqttOptions) != 0)
 	{
-		PRINTF("mqtt_client_connect failed\n");
 		vTaskDelay(pdMS_TO_TICKS(5000));
 	}
 	PRINTF("mqtt_client_connect success\n");
