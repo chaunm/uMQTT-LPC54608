@@ -13,6 +13,6 @@ int APP_GUI_printf(const char* string, ...);
 #define APP_GUI_FONT_H  8
 #define APP_GUI_FONT_V  6
 #define APP_GUI_MAX_CHARACTER_PER_LINE	80
-
+#define APP_GUI_MAX_STRING_SIZE			512
 
 #endif // _APP_GUI_H__

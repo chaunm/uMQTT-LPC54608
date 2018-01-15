@@ -11,6 +11,8 @@
 #define COLOR_BUTTON_FIRST_ID (GUI_ID_USER)
 #define COLOR_BUTTON_LAST_ID (COLOR_BUTTON_FIRST_ID + COLOR_BUTTONS - 1)
 
+static char displayString[APP_GUI_MAX_STRING_SIZE];
+
 static GUI_COLOR button_color[COLOR_BUTTONS] = {GUI_WHITE,   GUI_YELLOW, GUI_ORANGE, GUI_RED,
                                                 GUI_MAGENTA, GUI_BLUE,   GUI_GREEN,  GUI_BLACK};
 
@@ -91,19 +93,17 @@ void APP_GUI_Init()
 
 int APP_GUI_printf(const char* string, ...)
 {
-    char* displayString;
     char* lcdString;
     int i, line, lineCount, dispLength, pos;
-    displayString = (char*)malloc(1024);
-    memset(displayString, 0, 1024);
+    memset(displayString, 0, APP_GUI_MAX_STRING_SIZE);
     va_list ap;
     va_start(ap, string);
     vsprintf(displayString, string, ap);
     va_end(ap);
     dispLength = strlen(displayString);
-    if (dispLength > 1024)
+    if (dispLength > APP_GUI_MAX_STRING_SIZE)
     {
-    	free(displayString);
+//    	free(displayString);
     	return -1;
     }
 
@@ -152,6 +152,6 @@ int APP_GUI_printf(const char* string, ...)
     	WM_Exec();
     	free(lcdString);
     }
-    free(displayString);
+//    free(displayString);
     return 0;
 }
