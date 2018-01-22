@@ -852,7 +852,7 @@
 									<listOptionValue builtIn="false" value="SDK_DEBUGCONSOLE=1"/>
 									<listOptionValue builtIn="false" value="MQTT_USE_TLS=1"/>
 									<listOptionValue builtIn="false" value="USE_MBED_TLS=1"/>
-									<listOptionValue builtIn="false" value="USE_EXTERNAL_RAM=0"/>
+									<listOptionValue builtIn="false" value="USE_EXTERNAL_RAM=1"/>
 									<listOptionValue builtIn="false" value="LCD_PRINT=1"/>
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.undef.symbol.1024375016" name="Undefined symbols (-U)" superClass="gnu.c.compiler.option.preprocessor.undef.symbol" useByScannerDiscovery="false"/>
@@ -1034,7 +1034,7 @@
 							</tool>
 							<tool id="com.crt.advproject.link.exe.debug.1387968006" name="MCU Linker" superClass="com.crt.advproject.link.exe.debug">
 								<option id="com.crt.advproject.link.thumb.1294005060" name="Thumb mode" superClass="com.crt.advproject.link.thumb" useByScannerDiscovery="false" value="true" valueType="boolean"/>
-								<option id="com.crt.advproject.link.memory.heapAndStack.941236061" name="Heap and Stack options" superClass="com.crt.advproject.link.memory.heapAndStack" useByScannerDiscovery="false" value="&amp;Heap:RAM4;Post Data;0xf0000&amp;Stack:SRAM_0_1_2_3;End;0x4000" valueType="string"/>
+								<option id="com.crt.advproject.link.memory.heapAndStack.941236061" name="Heap and Stack options" superClass="com.crt.advproject.link.memory.heapAndStack" useByScannerDiscovery="false" value="&amp;Heap:EXTERNAL_RAM;Post Data;0x28000&amp;Stack:SRAM_0_1_2_3;End;0x4000" valueType="string"/>
 								<option id="com.crt.advproject.link.gcc.multicore.master.userobjs.1280506223" name="Slave Objects (not visible)" superClass="com.crt.advproject.link.gcc.multicore.master.userobjs" useByScannerDiscovery="false" valueType="userObjs"/>
 								<option id="com.crt.advproject.link.arch.720260753" name="Architecture" superClass="com.crt.advproject.link.arch" useByScannerDiscovery="false" value="com.crt.advproject.link.target.cm4" valueType="enumerated"/>
 								<option id="gnu.c.link.option.nostart.1777544281" name="Do not use standard start files (-nostartfiles)" superClass="gnu.c.link.option.nostart" useByScannerDiscovery="false"/>
@@ -1822,7 +1822,7 @@
 							</tool>
 							<tool id="com.crt.advproject.link.exe.debug.147012610" name="MCU Linker" superClass="com.crt.advproject.link.exe.debug">
 								<option id="com.crt.advproject.link.thumb.837373336" name="Thumb mode" superClass="com.crt.advproject.link.thumb" useByScannerDiscovery="false" value="true" valueType="boolean"/>
-								<option id="com.crt.advproject.link.memory.heapAndStack.366330698" name="Heap and Stack options" superClass="com.crt.advproject.link.memory.heapAndStack" useByScannerDiscovery="false" value="&amp;Heap:Default;Post Data;0x10000&amp;Stack:Default;End;0x1000" valueType="string"/>
+								<option id="com.crt.advproject.link.memory.heapAndStack.366330698" name="Heap and Stack options" superClass="com.crt.advproject.link.memory.heapAndStack" useByScannerDiscovery="false" value="&amp;Heap:Default;Post Data;0x4000&amp;Stack:Default;End;0x1000" valueType="string"/>
 								<option id="com.crt.advproject.link.gcc.multicore.master.userobjs.1319458065" name="Slave Objects (not visible)" superClass="com.crt.advproject.link.gcc.multicore.master.userobjs" useByScannerDiscovery="false" valueType="userObjs"/>
 								<option id="com.crt.advproject.link.arch.219131124" name="Architecture" superClass="com.crt.advproject.link.arch" useByScannerDiscovery="false" value="com.crt.advproject.link.target.cm4" valueType="enumerated"/>
 								<option id="gnu.c.link.option.nostart.750427439" name="Do not use standard start files (-nostartfiles)" superClass="gnu.c.link.option.nostart" useByScannerDiscovery="false"/>

@@ -3853,7 +3853,31 @@ int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t 
 #include <stdlib.h>
 
 /*---------HEAP_3 calloc --------------------------------------------------*/
+#if USE_RTOS_HEAP_4
+void *pvPortCalloc(size_t num, size_t size)
+{
+    void *pvReturn;
+    size_t xWantedSize = num * size;
 
+    vTaskSuspendAll();
+    {
+        pvReturn = pvPortMalloc(xWantedSize);
+        traceMALLOC(pvReturn, xWantedSize);
+    }
+    (void)xTaskResumeAll();
+
+#if (configUSE_MALLOC_FAILED_HOOK == 1)
+    {
+        if (pvReturn == NULL)
+        {
+            extern void vApplicationMallocFailedHook(void);
+            vApplicationMallocFailedHook();
+        }
+    }
+#endif
+    return pvReturn;
+}
+#else
 void *pvPortCalloc(size_t num, size_t size)
 {
     void *pvReturn;
@@ -3874,7 +3898,7 @@ void *pvPortCalloc(size_t num, size_t size)
         }
     }
 #endif
-
     return pvReturn;
 }
+#endif
 #endif /* USE_RTOS && defined(FSL_RTOS_FREE_RTOS) && defined(MBEDTLS_FREESCALE_FREERTOS_CALLOC_ALT) */

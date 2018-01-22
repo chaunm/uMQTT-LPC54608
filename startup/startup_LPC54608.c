@@ -399,8 +399,6 @@ void ResetISR(void) {
     CLOCK_EnableClock(kCLOCK_InputMux);
     BOARD_InitPins();
     BOARD_InitBootClocks();
-    /* Init FSL debug console. */
-    BOARD_InitDebugConsole();
     BOARD_InitSDRAM();
 #endif // USE_EXTERNAL_RAM
     //

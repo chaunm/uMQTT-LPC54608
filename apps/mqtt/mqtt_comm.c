@@ -31,12 +31,10 @@ static void MQTT_Comm_OnOperationComplete(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT
         	mqtt_comm->state = MQTT_CONNECTED;
         	if (mqtt_comm->fnConnectedCallback != NULL)
         		mqtt_comm->fnConnectedCallback(mqtt_comm, mqtt_comm->connectedCbContext);
-            PRINTF("ConnAck function called\r\n");
             break;
         }
         case MQTT_CLIENT_ON_SUBSCRIBE_ACK:
         {
-        	PRINTF("mqtt subscribe ack received\n");
         	if (mqtt_comm->fnSubCallback != NULL)
         		mqtt_comm->fnSubCallback(mqtt_comm, mqtt_comm->subCbContext);
             break;
@@ -58,7 +56,6 @@ static void MQTT_Comm_OnOperationComplete(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT
         }
         case MQTT_CLIENT_ON_PUBLISH_COMP:
         {
-        	PRINTF("MQTT Client publish finished\n");
         	if (mqtt_comm->fnPubCallback != NULL)
         		mqtt_comm->fnPubCallback(mqtt_comm, mqtt_comm->pubCbContext);
             break;
@@ -92,7 +89,7 @@ static void MQTT_Comm_OnErrorComplete(MQTT_CLIENT_HANDLE mqtt_handle, MQTT_CLIEN
     case MQTT_CLIENT_NO_PING_RESPONSE:
     case MQTT_CLIENT_UNKNOWN_ERROR:
         mqtt_comm->state = MQTT_ERROR;
-        PRINTF("MQTT Error Code: %d\n", error);
+        PRINTF("%s, Line: %d: MQTT Error Code: %d\n", __FILE__, __LINE__, error);
         break;
     }
 }
@@ -197,6 +194,7 @@ void MQTT_Comm_Process(MQTT_COMMUNICATOR_HANDLE mqtt_comm)
 				mqtt_comm->xioHandle = xio_create(socketio_get_interface_description(), &mqtt_comm->xioConfigs.socketConfig);
 			}
 			mqtt_comm->state = MQTT_CONNECTING;
+			PRINTF("Reconnecting...\n");
 			while (mqtt_client_connect(mqtt_comm->mqttHandle, mqtt_comm->xioHandle, &mqtt_comm->mqttOptions) != 0)
 				vTaskDelay(pdMS_TO_TICKS(5000));
 			if (mqtt_comm->state == MQTT_CONNECTING) //some time error occure but mqtt_client_connect still return succedd --> need to check

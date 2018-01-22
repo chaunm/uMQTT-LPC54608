@@ -55,16 +55,16 @@
 
 int main(void) {
 	CLOCK_EnableClock(kCLOCK_InputMux);
-
+	BOARD_InitBootClocks();
   	/* Init board hardware. */
 #if !USE_EXTERNAL_RAM
     BOARD_InitPins();
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
-  	/* Init FSL debug console. */
-    BOARD_InitDebugConsole();
     BOARD_InitSDRAM();
 #endif
+    /* Init FSL debug console. */
+    BOARD_InitDebugConsole();
     /* init GUI */
     BOARD_InitPWM();
 #ifdef LCD_PRINT

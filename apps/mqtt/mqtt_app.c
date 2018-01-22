@@ -71,7 +71,7 @@ static void MqttAppRecvCallback(MQTT_COMMUNICATOR_HANDLE mqtt_comm, MQTT_MESSAGE
 
 static void MqttAppPubCallback(MQTT_COMMUNICATOR_HANDLE mqtt_comm, void* context)
 {
-	PRINTF("Message Publish finish\n");
+	PRINTF("Message Publish finished\n");
 }
 
 void prvMqttAppTask(void* pvParameter)
