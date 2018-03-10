@@ -13,6 +13,8 @@
 sys_thread_t xMqttAppThread = NULL;
 sys_thread_t xMqttMonitorThread = NULL;
 
+MQTT_COMMUNICATOR_HANDLE appMqttComm;
+
 static const char* TOPIC_NAME_A = "LPC54608/TEST";
 static const char* TOPIC_NAME_B = "LPC54608/TEST";
 static const char* APP_NAME_A = "Message from LPC54608.";
@@ -77,12 +79,11 @@ static void MqttAppPubCallback(MQTT_COMMUNICATOR_HANDLE mqtt_comm, void* context
 
 void prvMqttAppTask(void* pvParameter)
 {
-	MQTT_COMMUNICATOR_HANDLE appMqttComm;
-	static uint32_t taskNotifyValue;
-	if (xTaskNotifyWait(0x01, 0x01, &taskNotifyValue, portMAX_DELAY) == pdFALSE)
-	{
-		vTaskDelete(NULL);
-	}
+//	static uint32_t taskNotifyValue;
+//	if (xTaskNotifyWait(0x01, 0x01, &taskNotifyValue, portMAX_DELAY) == pdFALSE)
+//	{
+//		vTaskDelete(NULL);
+//	}
 #ifdef MQTT_USE_TLS
 	appMqttComm = MQTT_Comm_Create(host, port, clientId, pers, NULL, NULL, true, rootCa, clientCert, privateKey, rootCaSize, clientCertSize, privateKeySize);
 #else
@@ -91,25 +92,51 @@ void prvMqttAppTask(void* pvParameter)
 		vTaskDelete(NULL);
 	MQTT_Comm_SetCallback(appMqttComm, MqttAppConnectCallback, NULL, MqttAppSubcribesCallback, NULL,
 			MqttAppRecvCallback, NULL, MqttAppPubCallback, NULL);
-	MQTT_Comm_Process(appMqttComm);
+	MQTT_Comm_Start_Connection(appMqttComm);
+	while (1)
+	{
+		MQTT_Comm_Process(appMqttComm);
+		if (xMqttMonitorThread != NULL)
+			xTaskNotify(xMqttMonitorThread, 0x02, eNoAction);
+		if (appMqttComm->state == MQTT_DISCONNECTED)
+			break;
+	}
 	// while task still in process then the below code will not be entered
 	if (xMqttMonitorThread != NULL)
-		xTaskNotify(xMqttAppThread, 0x01, eNoAction);
+		xTaskNotify(xMqttMonitorThread, 0x01, eNoAction);
 	vTaskDelete(NULL);
 }
 
 void prvMqttMonitorTask(void* pvParameter)
 {
 	static uint32_t taskNotifyValue;
+	if (xTaskNotifyWait(0x01, 0x01, &taskNotifyValue, portMAX_DELAY) == pdFALSE)
+	{
+		vTaskDelete(NULL);
+	}
+	xTaskCreate( prvMqttAppTask, "mqtt", 1024, NULL, 3, &xMqttAppThread );
+	taskNotifyValue = 0;
 	while (1)
 	{
-		if (xTaskNotifyWait(0x01, 0x01, &taskNotifyValue, pdMS_TO_TICKS(60000)) == pdTRUE)
+		if (xTaskNotifyWait(0x07, 0x07, &taskNotifyValue, pdMS_TO_TICKS(60000)) == pdTRUE)
 		{
-			if (taskNotifyValue |= 0x01)
+			if (taskNotifyValue &= 0x00000001)
 			{
 				PRINTF("MQTT task end, restart task\n");
 				xTaskCreate( prvMqttAppTask, "mqtt", 1024, NULL, 3, &xMqttAppThread );
 			}
+			taskNotifyValue = 0;
+		}
+		else
+		{
+			PRINTF("MQTT task halted\n");
+			MQTT_Comm_Destroy(appMqttComm);
+			if (xMqttAppThread != NULL)
+			{
+				vTaskDelete(xMqttAppThread);
+				xMqttAppThread = NULL;
+			}
+			xTaskCreate( prvMqttAppTask, "mqtt", 1024, NULL, 3, &xMqttAppThread );
 		}
 	}
 	vTaskDelete(NULL);

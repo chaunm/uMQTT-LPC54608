@@ -169,19 +169,25 @@ void MQTT_Comm_Destroy(MQTT_COMMUNICATOR_HANDLE mqtt_comm)
 	mqtt_client_deinit(mqtt_comm->mqttHandle);
 	free(mqtt_comm);
 }
+
+void MQTT_Comm_Start_Connection(MQTT_COMMUNICATOR_HANDLE mqtt_comm)
+{
+	mqtt_comm->state = MQTT_CONNECTING;
+}
+
 void MQTT_Comm_Process(MQTT_COMMUNICATOR_HANDLE mqtt_comm)
 {
 	if (mqtt_comm == NULL)
 		return;
-	mqtt_comm->state = MQTT_CONNECTING;
-	while (mqtt_client_connect(mqtt_comm->mqttHandle, mqtt_comm->xioHandle, &mqtt_comm->mqttOptions) != 0)
-	{
-		vTaskDelay(pdMS_TO_TICKS(5000));
-	}
-	PRINTF("mqtt_client_connect success\n");
-	if (mqtt_comm->state == MQTT_CONNECTING)
-		mqtt_comm->state = MQTT_CONNECTED;
-	while (1)
+//	mqtt_comm->state = MQTT_CONNECTING;
+//	while (mqtt_client_connect(mqtt_comm->mqttHandle, mqtt_comm->xioHandle, &mqtt_comm->mqttOptions) != 0)
+//	{
+//		vTaskDelay(pdMS_TO_TICKS(5000));
+//	}
+//	PRINTF("mqtt_client_connect success\n");
+//	if (mqtt_comm->state == MQTT_CONNECTING)
+//		mqtt_comm->state = MQTT_CONNECTED;
+//	while (1)
 	{
 		switch(mqtt_comm->state)
 		{
@@ -204,8 +210,11 @@ void MQTT_Comm_Process(MQTT_COMMUNICATOR_HANDLE mqtt_comm)
 			}
 			mqtt_comm->state = MQTT_CONNECTING;
 			PRINTF("Reconnecting...\n");
+			break;
+		case MQTT_CONNECTING:
 			while (mqtt_client_connect(mqtt_comm->mqttHandle, mqtt_comm->xioHandle, &mqtt_comm->mqttOptions) != 0)
 				vTaskDelay(pdMS_TO_TICKS(5000));
+			PRINTF("mqtt_client_connect success\n");
 			if (mqtt_comm->state == MQTT_CONNECTING) //some time error occure but mqtt_client_connect still return succedd --> need to check
 				mqtt_comm->state = MQTT_CONNECTED;
 			break;
@@ -215,6 +224,7 @@ void MQTT_Comm_Process(MQTT_COMMUNICATOR_HANDLE mqtt_comm)
 			xio_destroy(mqtt_comm->xioHandle);
 			mqtt_client_deinit(mqtt_comm->mqttHandle);
 			free(mqtt_comm);
+			mqtt_comm = NULL;
 			goto END_PROCESS;
 			break;
 		default:

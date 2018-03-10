@@ -59,7 +59,7 @@ void stack_init(void *arg)
     dns_init();
     PRINTF("Network stack setup finish\r\n");
 //    vTaskDelay(pdMS_TO_TICKS(1000));
-    if (xMqttAppThread != NULL)
-    	xTaskNotify(xMqttAppThread, 0x01, eNoAction);
+    if (xMqttMonitorThread != NULL)
+    	xTaskNotify(xMqttMonitorThread, 0x04, eNoAction);
     vTaskDelete(NULL);
 }

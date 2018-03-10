@@ -60,6 +60,7 @@ MQTT_COMMUNICATOR_HANDLE MQTT_Comm_Create(const char* host, int port, const char
 		const char* userName, const char* password,
 		bool security, const char* rootCa, const char* clientCrt, const char* privateKey, size_t rootCaSize, size_t clientCrtSize, size_t privKeySize);
 void MQTT_Comm_Destroy(MQTT_COMMUNICATOR_HANDLE mqtt_comm);
+void MQTT_Comm_Start_Connection(MQTT_COMMUNICATOR_HANDLE mqtt_comm);
 void MQTT_Comm_Process(MQTT_COMMUNICATOR_HANDLE mqtt_comm);
 int MQTT_Comm_Publish(MQTT_COMMUNICATOR_HANDLE mqtt_comm, const char* topic, const char* message, size_t size, uint8_t qos);
 int MQTT_Comm_Subcribe(MQTT_COMMUNICATOR_HANDLE mqtt_comm, const char* topic, QOS_VALUE qos);
