@@ -60,6 +60,6 @@ void stack_init(void *arg)
     PRINTF("Network stack setup finish\r\n");
 //    vTaskDelay(pdMS_TO_TICKS(1000));
     if (xMqttMonitorThread != NULL)
-    	xTaskNotify(xMqttMonitorThread, 0x04, eNoAction);
+    	xTaskNotify(xMqttMonitorThread, 0x04, eSetBits);
     vTaskDelete(NULL);
 }

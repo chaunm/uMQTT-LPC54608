@@ -97,13 +97,13 @@ void prvMqttAppTask(void* pvParameter)
 	{
 		MQTT_Comm_Process(appMqttComm);
 		if (xMqttMonitorThread != NULL)
-			xTaskNotify(xMqttMonitorThread, 0x02, eNoAction);
+			xTaskNotify(xMqttMonitorThread, 0x02, eSetBits);
 		if (appMqttComm->state == MQTT_DISCONNECTED)
 			break;
 	}
 	// while task still in process then the below code will not be entered
 	if (xMqttMonitorThread != NULL)
-		xTaskNotify(xMqttMonitorThread, 0x01, eNoAction);
+		xTaskNotify(xMqttMonitorThread, 0x01, eSetBits);
 	vTaskDelete(NULL);
 }
 
