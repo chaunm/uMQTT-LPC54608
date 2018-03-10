@@ -160,6 +160,15 @@ MQTT_COMMUNICATOR_HANDLE MQTT_Comm_Create(const char* host, int port, const char
 	return mqtt_comm;
 }
 
+void MQTT_Comm_Destroy(MQTT_COMMUNICATOR_HANDLE mqtt_comm)
+{
+	if (mqtt_comm == NULL)
+		return;
+	xio_close(mqtt_comm->xioHandle,  NULL, NULL);
+	xio_destroy(mqtt_comm->xioHandle);
+	mqtt_client_deinit(mqtt_comm->mqttHandle);
+	free(mqtt_comm);
+}
 void MQTT_Comm_Process(MQTT_COMMUNICATOR_HANDLE mqtt_comm)
 {
 	if (mqtt_comm == NULL)
@@ -201,11 +210,13 @@ void MQTT_Comm_Process(MQTT_COMMUNICATOR_HANDLE mqtt_comm)
 				mqtt_comm->state = MQTT_CONNECTED;
 			break;
 		case MQTT_DISCONNECTED:
+			PRINTF("MQTT Disconnect\n");
 			xio_close(mqtt_comm->xioHandle,  NULL, NULL);
 			xio_destroy(mqtt_comm->xioHandle);
 			mqtt_client_deinit(mqtt_comm->mqttHandle);
 			free(mqtt_comm);
 			goto END_PROCESS;
+			break;
 		default:
 			break;
 		}

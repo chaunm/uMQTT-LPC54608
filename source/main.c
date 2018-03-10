@@ -75,9 +75,9 @@ int main(void) {
     if(sys_thread_new("lwip init", stack_init, NULL, INIT_THREAD_STACKSIZE, 3) == NULL)
     	LWIP_ASSERT("lwip init(): Task creation failed.", 0);
     // Create mqtt thread
-//    xTaskCreate( prvMQTTEchoTask, "mqtt", 2048, NULL, 3, &xMqttThread );
     xTaskCreate( prvMqttAppTask, "mqtt", 1024, NULL, 3, &xMqttAppThread );
     PRINTF("Creat mqtt process @ task ID %p\n", xMqttAppThread);
+    xTaskCreate( prvMqttMonitorTask, "mqtt_monitor", 256, NULL, 3, &xMqttMonitorThread);
     /* RTOS task scheduler process */
     vTaskStartScheduler();
 

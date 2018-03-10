@@ -10,10 +10,11 @@
 #include "fsl_debug_console.h"
 #include "certs/certs.h"
 
-sys_thread_t xMqttAppThread;
+sys_thread_t xMqttAppThread = NULL;
+sys_thread_t xMqttMonitorThread = NULL;
 
 static const char* TOPIC_NAME_A = "LPC54608/TEST";
-static const char* TOPIC_NAME_B = "WICED/TEST";
+static const char* TOPIC_NAME_B = "LPC54608/TEST";
 static const char* APP_NAME_A = "Message from LPC54608.";
 
 /* MQTT CLIENT INFO */
@@ -77,7 +78,7 @@ static void MqttAppPubCallback(MQTT_COMMUNICATOR_HANDLE mqtt_comm, void* context
 void prvMqttAppTask(void* pvParameter)
 {
 	MQTT_COMMUNICATOR_HANDLE appMqttComm;
-	uint32_t taskNotifyValue;
+	static uint32_t taskNotifyValue;
 	if (xTaskNotifyWait(0x01, 0x01, &taskNotifyValue, portMAX_DELAY) == pdFALSE)
 	{
 		vTaskDelete(NULL);
@@ -91,6 +92,25 @@ void prvMqttAppTask(void* pvParameter)
 	MQTT_Comm_SetCallback(appMqttComm, MqttAppConnectCallback, NULL, MqttAppSubcribesCallback, NULL,
 			MqttAppRecvCallback, NULL, MqttAppPubCallback, NULL);
 	MQTT_Comm_Process(appMqttComm);
+	// while task still in process then the below code will not be entered
+	if (xMqttMonitorThread != NULL)
+		xTaskNotify(xMqttAppThread, 0x01, eNoAction);
 	vTaskDelete(NULL);
 }
 
+void prvMqttMonitorTask(void* pvParameter)
+{
+	static uint32_t taskNotifyValue;
+	while (1)
+	{
+		if (xTaskNotifyWait(0x01, 0x01, &taskNotifyValue, pdMS_TO_TICKS(60000)) == pdTRUE)
+		{
+			if (taskNotifyValue |= 0x01)
+			{
+				PRINTF("MQTT task end, restart task\n");
+				xTaskCreate( prvMqttAppTask, "mqtt", 1024, NULL, 3, &xMqttAppThread );
+			}
+		}
+	}
+	vTaskDelete(NULL);
+}
