@@ -4,7 +4,7 @@
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/xio.h"
 #include "azure_c_shared_utility/threadapi.h"
-#include "azure_c_shared_utility/tlsio_mbedtls.h"
+
 #include "debug.h"
 
 int platform_init(void)
@@ -16,7 +16,7 @@ int platform_init(void)
 
 const IO_INTERFACE_DESCRIPTION* platform_get_default_tlsio(void)
 {
-    return tlsio_mbedtls_get_interface_description();
+    return tlsio_cyclonessl_get_interface_description();
 }
 
 STRING_HANDLE platform_get_platform_info(void)
@@ -28,6 +28,6 @@ STRING_HANDLE platform_get_platform_info(void)
 
 void platform_deinit(void)
 {
-//    TRACE_INFO("Deinitializing platform \r\n");
+    TRACE_INFO("Deinitializing platform \r\n");
     while(1) {};
 }

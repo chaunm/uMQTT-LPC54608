@@ -44,8 +44,8 @@
     CODEC_STATE_VAR_HEADER,     \
     CODEC_STATE_PAYLOAD
 
-static const char* TRUE_CONST = "true";
-static const char* FALSE_CONST = "false";
+static const char* const TRUE_CONST = "true";
+static const char* const FALSE_CONST = "false";
 
 DEFINE_ENUM(CODEC_STATE_RESULT, CODEC_STATE_VALUES);
 
@@ -84,7 +84,7 @@ static const char* retrieve_qos_value(QOS_VALUE value)
     }
 }
 
-void byteutil_writeByte(uint8_t** buffer, uint8_t value)
+static void byteutil_writeByte(uint8_t** buffer, uint8_t value)
 {
     if (buffer != NULL)
     {
@@ -93,7 +93,7 @@ void byteutil_writeByte(uint8_t** buffer, uint8_t value)
     }
 }
 
-void byteutil_writeInt(uint8_t** buffer, uint16_t value)
+static void byteutil_writeInt(uint8_t** buffer, uint16_t value)
 {
     if (buffer != NULL)
     {
@@ -104,7 +104,7 @@ void byteutil_writeInt(uint8_t** buffer, uint16_t value)
     }
 }
 
-void byteutil_writeUTF(uint8_t** buffer, const char* stringData, uint16_t len)
+static void byteutil_writeUTF(uint8_t** buffer, const char* stringData, uint16_t len)
 {
     if (buffer != NULL)
     {
@@ -114,7 +114,7 @@ void byteutil_writeUTF(uint8_t** buffer, const char* stringData, uint16_t len)
     }
 }
 
-CONTROL_PACKET_TYPE processControlPacketType(uint8_t pktByte, int* flags)
+static CONTROL_PACKET_TYPE processControlPacketType(uint8_t pktByte, int* flags)
 {
     CONTROL_PACKET_TYPE result;
     result = PACKET_TYPE_BYTE(pktByte);
@@ -279,7 +279,7 @@ static int constructPublishVariableHeader(BUFFER_HANDLE ctrlPacket, const PUBLIS
             {
                 if (trace_log != NULL)
                 {
-                    STRING_sprintf(trace_log, " | PACKET_ID: %d", publishHeader->packetId); // chaunm
+                    STRING_sprintf(trace_log, " | PACKET_ID: %d", publishHeader->packetId);
                 }
                 byteutil_writeInt(&iterator, publishHeader->packetId);
             }
@@ -483,7 +483,7 @@ static int constructConnPayload(BUFFER_HANDLE ctrlPacket, const MQTT_CLIENT_OPTI
                     }
                     packet[CONN_FLAG_BYTE_OFFSET] |= WILL_FLAG_FLAG;
                     byteutil_writeUTF(&iterator, mqttOptions->willTopic, (uint16_t)willTopicLen);
-                    packet[CONN_FLAG_BYTE_OFFSET] |= mqttOptions->qualityOfServiceValue;
+                    packet[CONN_FLAG_BYTE_OFFSET] |= (mqttOptions->qualityOfServiceValue << 3);
                     if (mqttOptions->messageRetain)
                     {
                         packet[CONN_FLAG_BYTE_OFFSET] |= WILL_RETAIN_FLAG;
@@ -943,7 +943,7 @@ BUFFER_HANDLE mqtt_codec_subscribe(uint16_t packetId, SUBSCRIBE_PAYLOAD* subscri
                 STRING_HANDLE sub_trace = NULL;
                 if (trace_log != NULL)
                 {
-                    sub_trace = STRING_construct_sprintf(" | PACKET_ID: %d", packetId); // chaunm
+                    sub_trace = STRING_construct_sprintf(" | PACKET_ID: %d", packetId);
                 }
                 /* Codes_SRS_MQTT_CODEC_07_024: [mqtt_codec_subscribe shall iterate through count items in the subscribeList.] */
                 if (addListItemsToSubscribePacket(result, subscribeList, count, sub_trace) != 0)
@@ -1008,7 +1008,7 @@ BUFFER_HANDLE mqtt_codec_unsubscribe(uint16_t packetId, const char** unsubscribe
                 STRING_HANDLE unsub_trace = NULL;
                 if (trace_log != NULL)
                 {
-                    unsub_trace = STRING_construct_sprintf(" | PACKET_ID: %d", packetId); // chaunm
+                    unsub_trace = STRING_construct_sprintf(" | PACKET_ID: %d", packetId);
                 }
                 /* Codes_SRS_MQTT_CODEC_07_028: [mqtt_codec_unsubscribe shall iterate through count items in the unsubscribeList.] */
                 if (addListItemsToUnsubscribePacket(result, unsubscribeList, count, unsub_trace) != 0)

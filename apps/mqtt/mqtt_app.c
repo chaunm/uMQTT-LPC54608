@@ -22,7 +22,7 @@ static const char* APP_NAME_A = "Message from LPC54608.";
 /* MQTT CLIENT INFO */
 static const char* clientId = "LPC54608";
 #if MQTT_USE_TLS
-static const char* host = "192.168.1.27";
+static const char* host = "192.168.1.17";
 static int port = 8883;
 static const char* pers = "raspberrypi";
 #else

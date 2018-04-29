@@ -42,6 +42,9 @@ typedef enum LOG_CATEGORY_TAG
 typedef void(*LOGGER_LOG)(LOG_CATEGORY log_category, const char* file, const char* func, int line, unsigned int options, const char* format, ...);
 typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int line, const char* format, ...);
 
+#define TEMP_BUFFER_SIZE 1024
+#define MESSAGE_BUFFER_SIZE 260
+
 #define LOG_NONE 0x00
 #define LOG_LINE 0x01
 
@@ -49,6 +52,7 @@ typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int l
 #ifdef NO_LOGGING
 #define LOG(...)
 #define LogInfo(...)
+#define LogBinary(...)
 #define LogError(...)
 #define xlogging_get_log_function() NULL
 #define xlogging_set_log_function(...)
@@ -57,6 +61,7 @@ typedef void(*LOGGER_LOG_GETLASTERROR)(const char* file, const char* func, int l
 #elif (defined MINIMAL_LOGERROR)
 #define LOG(...)
 #define LogInfo(...)
+#define LogBinary(...)
 #define LogError(...) printf("error %s: line %d\n",__FILE__,__LINE__);
 #define xlogging_get_log_function() NULL
 #define xlogging_set_log_function(...)
@@ -100,8 +105,6 @@ extern LOGGER_LOG_GETLASTERROR xlogging_get_log_function_GetLastError(void);
 #endif
 
 #define LogError(FORMAT, ...) do{ LOG(AZ_LOG_ERROR, LOG_LINE, FORMAT, __VA_ARGS__); }while((void)0,0)
-#define TEMP_BUFFER_SIZE 1024
-#define MESSAGE_BUFFER_SIZE 260
 #define LogErrorWinHTTPWithGetLastErrorAsString(FORMAT, ...) do { \
                 DWORD errorMessageID = GetLastError(); \
                 char messageBuffer[MESSAGE_BUFFER_SIZE]; \
@@ -135,6 +138,8 @@ extern LOGGER_LOG_GETLASTERROR xlogging_get_log_function_GetLastError(void);
 #else
 #define LogError(FORMAT, ...) do{ LOG(AZ_LOG_ERROR, LOG_LINE, FORMAT, ##__VA_ARGS__); }while((void)0,0)
 #endif
+
+extern void LogBinary(const char* comment, const void* data, size_t size);
 
 extern void xlogging_set_log_function(LOGGER_LOG log_function);
 extern LOGGER_LOG xlogging_get_log_function(void);
