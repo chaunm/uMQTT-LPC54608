@@ -448,6 +448,10 @@ void tlsio_mbedtls_destroy(CONCRETE_IO_HANDLE tls_io)
         mbedtls_ssl_free(&tls_io_instance->ssl);
         mbedtls_ssl_config_free(&tls_io_instance->config);
         mbedtls_x509_crt_free(&tls_io_instance->trusted_certificates_parsed);
+        // chaunm add: free 2 more certificate instant
+        mbedtls_x509_crt_free(&tls_io_instance->client_certificates_parsed);
+        mbedtls_pk_free(&tls_io_instance->client_private_key_parsed);
+        // end chaunm editted
         mbedtls_ctr_drbg_free(&tls_io_instance->ctr_drbg);
         mbedtls_entropy_free(&tls_io_instance->entropy);
 
@@ -764,7 +768,7 @@ int tlsio_mbedtls_setoption(CONCRETE_IO_HANDLE tls_io, const char* optionName, c
             	int parse_result = mbedtls_x509_crt_parse(&tls_io_instance->trusted_certificates_parsed, (const unsigned char *)caCert->certs, caCert->certsSize);
                 if (parse_result != 0)
                 {
-                    LogInfo("Malformed pem certificate");
+                    LogInfo("Malformed CA certificate");
                     result = __FAILURE__;
                 }
                 else
@@ -797,7 +801,7 @@ int tlsio_mbedtls_setoption(CONCRETE_IO_HANDLE tls_io, const char* optionName, c
         		int parse_result = mbedtls_x509_crt_parse(&tls_io_instance->client_certificates_parsed, (const unsigned char *)clientCert->certs, clientCert->certsSize);
         		if (parse_result != 0)
         		{
-        			LogInfo("Malformed pem certificate");
+        			LogInfo("Malformed client certificate");
         			result = __FAILURE__;
         		}
         		else
@@ -832,7 +836,7 @@ int tlsio_mbedtls_setoption(CONCRETE_IO_HANDLE tls_io, const char* optionName, c
         		int parse_result = mbedtls_pk_parse_key(&tls_io_instance->client_private_key_parsed, (const unsigned char *)privateKey->key, privateKey->keySize, NULL, 0);
         		if (parse_result != 0)
         		{
-        			LogInfo("Malformed pem certificate");
+        			LogInfo("Malformed private key");
         			result = __FAILURE__;
         		}
         		else
