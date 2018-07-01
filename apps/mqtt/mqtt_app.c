@@ -15,16 +15,16 @@ sys_thread_t xMqttMonitorThread = NULL;
 
 MQTT_COMMUNICATOR_HANDLE appMqttComm;
 
-static const char* TOPIC_NAME_A = "LPC54608/TEST";
-static const char* TOPIC_NAME_B = "LPC54608/TEST";
+static const char* TOPIC_NAME_A = "LPC54608";
+static const char* TOPIC_NAME_B = "LPC54608";
 static const char* APP_NAME_A = "Message from LPC54608.";
 
 /* MQTT CLIENT INFO */
-static const char* clientId = "LPC54608";
+static const char* clientId = "LPC54608_Demo";
 #if MQTT_USE_TLS
-static const char* host = "192.168.1.17";
+static const char* host = "a32s480yeedt8r.iot.us-east-1.amazonaws.com";
 static int port = 8883;
-static const char* pers = "raspberrypi";
+static const char* pers = "*.iot.us-east-1.amazonaws.com";
 #else
 static const char* host = "iot.eclipse.org";
 static int port = 1883;
