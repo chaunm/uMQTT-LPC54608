@@ -1,7 +1,7 @@
 //#include "wiced_resource.h"
 #include <certs/certs.h>
 /* aws */
-
+#ifdef AWS
 const char clientCert[] = "-----BEGIN CERTIFICATE-----\n" \
 "MIIDWTCCAkGgAwIBAgIUafLBL4SZYEk1J6znQma8DrXmoecwDQYJKoZIhvcNAQEL\n" \
 "BQAwTTFLMEkGA1UECwxCQW1hem9uIFdlYiBTZXJ2aWNlcyBPPUFtYXpvbi5jb20g\n" \
@@ -22,8 +22,8 @@ const char clientCert[] = "-----BEGIN CERTIFICATE-----\n" \
 "MB1JeTgiT66KZD9uV4svCx/PY5/xUYjczAfS1PfhGCS+bsIauiLMuajke9CdfzUs\n" \
 "GpzNw02GFaVTcaQzgIfXICbkQFfDYHsNpCKWaaLYokB+rCEAhMMwPWihzl7k\n" \
 "-----END CERTIFICATE-----\n";
-
-/* raspberry pi *
+#else
+/* raspberry pi */
 const char clientCert[] = "-----BEGIN CERTIFICATE-----\n" \
 "MIIEUTCCAzmgAwIBAgIJAK13AaG3IKRSMA0GCSqGSIb3DQEBDQUAMGoxFzAVBgNV\n" \
 "BAMMDkFuIE1RVFQgYnJva2VyMRYwFAYDVQQKDA1Pd25UcmFja3Mub3JnMRQwEgYD\n" \
@@ -50,5 +50,5 @@ const char clientCert[] = "-----BEGIN CERTIFICATE-----\n" \
 "u0QToVy/ZRCGOdpVqMxjrKKM19xRz3+NHiQKy05pSipfpTmYFwCqyMMAhFzs6tMy\n" \
 "7GOwH1I=\n" \
 "-----END CERTIFICATE-----\n";
-*/
+#endif
 const size_t clientCertSize = sizeof(clientCert);

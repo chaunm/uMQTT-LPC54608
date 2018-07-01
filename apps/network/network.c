@@ -13,7 +13,6 @@
 #include "ethernetif.h"
 #include "app_gui.h"
 #include "network.h"
-#include "MQTTEcho.h"
 #include "mqtt_app.h"
 
 void stack_init(void *arg)

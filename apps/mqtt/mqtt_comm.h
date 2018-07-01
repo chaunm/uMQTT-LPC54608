@@ -36,9 +36,11 @@ typedef struct MQTT_COMMUNICATOR_TAG
 	int port;
 	const char* per;
 	bool security;
+#ifdef MQTT_USE_TLS
 	TLSIO_CERT_INSTANCE rootCa;
 	TLSIO_CERT_INSTANCE clientCert;
 	TLSIO_KEY_INSTANCE privateKey;
+#endif
 	XIO_HANDLE	xioHandle;
 	uint16_t packetId;
 	uint8_t state;

@@ -44,7 +44,6 @@
 #include "apps/GUI/app_gui.h"
 #include "network.h"
 #include "FreeRTOS.h"
-#include "MQTTEcho.h"
 #include "mqtt_app.h"
 /* TODO: insert other definitions and declarations here. */
 

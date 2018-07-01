@@ -1,5 +1,6 @@
 //#include "wiced_resource.h"
 #include <certs/certs.h>
+#ifdef AWS
 /* AWS CA */
 const char rootCa[] = "-----BEGIN CERTIFICATE-----\n" \
 "MIIE0zCCA7ugAwIBAgIQGNrRniZ96LtKIVjNzGs7SjANBgkqhkiG9w0BAQUFADCB\n" \
@@ -29,8 +30,8 @@ const char rootCa[] = "-----BEGIN CERTIFICATE-----\n" \
 "4fQRbxC1lfznQgUy286dUV4otp6F01vvpX1FQHKOtw5rDgb7MzVIcbidJ4vEZV8N\n" \
 "hnacRHr2lVz2XTIIM6RUthg/aFzyQkqFOFSDX9HoLPKsEdao7WNq\n" \
 "-----END CERTIFICATE-----\n";
-
-/* Raspberry pi Ca *
+#else
+/* Raspberry pi Ca */
 const char rootCa[] = "-----BEGIN CERTIFICATE-----\n"\
 "MIIDpzCCAo+gAwIBAgIJAKpi3Twp+3KZMA0GCSqGSIb3DQEBDQUAMGoxFzAVBgNV\n" \
 "BAMMDkFuIE1RVFQgYnJva2VyMRYwFAYDVQQKDA1Pd25UcmFja3Mub3JnMRQwEgYD\n" \
@@ -53,5 +54,5 @@ const char rootCa[] = "-----BEGIN CERTIFICATE-----\n"\
 "CbPWnc85uFyXkTPV1kq2EL1qOApHhqRTE7PkT32JZvoSLEEr1vCh9TJ3MwctEZT5\n" \
 "XG8uNkqgvhlAgEJ/1V1MryBPRqNbm5gXo0Yq\n" \
 "-----END CERTIFICATE-----\n";
-*/
+#endif
 const size_t rootCaSize = sizeof(rootCa);

@@ -1,5 +1,6 @@
 //#include "wiced_resource.h"
 #include <certs/certs.h>
+#ifdef AWS
 /* AWS */
 const char privateKey[] = "-----BEGIN RSA PRIVATE KEY-----\n" \
 "MIIEowIBAAKCAQEApRz6H/NlHuNJNGTmq9MMJJZrdLbsAGn1pATCGfvNDruAKrlj\n" \
@@ -28,8 +29,8 @@ const char privateKey[] = "-----BEGIN RSA PRIVATE KEY-----\n" \
 "vJtbasbwVQArbphS+ZNtSGKGZt7Xe+mBsfSOUhX4prBp34ZrANe+YnY6Jp9XDWXH\n" \
 "nurYNjcbAsZJDXzUAmPB4QoVXLGsifllpUrk7oVTYHkZqoAM1b0T\n" \
 "-----END RSA PRIVATE KEY-----\n";
-
-/* raspberry pi
+#else
+/* raspberry pi */
 const char privateKey[] = "-----BEGIN RSA PRIVATE KEY-----\n" \
 "MIIEpAIBAAKCAQEAt1/B3lqz49pvoTPjo2N2dZW9WclBl7PMuxR6aMLM79nEg2ki\n" \
 "BddlNjQKEVfayomiAVCBQDMxb4kXWXhVLBlrTlBD4RE1WubZPWBsRY9Pgvj30P2X\n" \
@@ -57,5 +58,5 @@ const char privateKey[] = "-----BEGIN RSA PRIVATE KEY-----\n" \
 "y2ygGHagUphcaNLQdqJ3gAYXMYitQl+ojoMH2uzktP4Yv3swxFOrgUkDv3/YASVN\n" \
 "jXFxEcHGKn/zhTyMa3SgCzSG8nhlobcsjETgFQZRYHNeMSPJgOxAYQ==\n" \
 "-----END RSA PRIVATE KEY-----\n";
-*/
+#endif
 const size_t privateKeySize = sizeof(privateKey);

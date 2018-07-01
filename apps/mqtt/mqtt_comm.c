@@ -122,6 +122,7 @@ MQTT_COMMUNICATOR_HANDLE MQTT_Comm_Create(const char* host, int port, const char
 	mqtt_comm->mqttOptions.keepAliveInterval = 30; // keep alive interval should be >= 21 due to internal mqtt_client.c process
 	mqtt_comm->mqttOptions.useCleanSession = true;
 	mqtt_comm->mqttOptions.qualityOfServiceValue = DELIVER_EXACTLY_ONCE;
+#ifdef MQTT_USE_TLS
 	if (security)
 	{
 		memset(&mqtt_comm->xioConfigs.tlsConfig, 0, sizeof(TLSIO_CONFIG));
@@ -145,6 +146,7 @@ MQTT_COMMUNICATOR_HANDLE MQTT_Comm_Create(const char* host, int port, const char
 		xio_setoption(mqtt_comm->xioHandle, OPTION_X509_ECC_KEY, (void*)&mqtt_comm->privateKey);
 	}
 	else
+#endif
 	{
 		mqtt_comm->xioConfigs.socketConfig.hostname = mqtt_comm->host;
 		mqtt_comm->xioConfigs.socketConfig.port = mqtt_comm->port;
@@ -197,6 +199,7 @@ void MQTT_Comm_Process(MQTT_COMMUNICATOR_HANDLE mqtt_comm)
 		case MQTT_ERROR:
 			xio_close(mqtt_comm->xioHandle, NULL, NULL);
 			xio_destroy(mqtt_comm->xioHandle);
+#ifdef MQTT_USE_TLS
 			if (mqtt_comm->security == true)
 			{
 				mqtt_comm->xioHandle = xio_create(tlsio_mbedtls_get_interface_description(), (void *)&mqtt_comm->xioConfigs.tlsConfig);
@@ -205,6 +208,7 @@ void MQTT_Comm_Process(MQTT_COMMUNICATOR_HANDLE mqtt_comm)
 				xio_setoption(mqtt_comm->xioHandle, OPTION_X509_ECC_KEY, (void*)&mqtt_comm->privateKey);
 			}
 			else
+#endif
 			{
 				mqtt_comm->xioHandle = xio_create(socketio_get_interface_description(), &mqtt_comm->xioConfigs.socketConfig);
 			}

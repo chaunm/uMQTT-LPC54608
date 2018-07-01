@@ -15,16 +15,22 @@ sys_thread_t xMqttMonitorThread = NULL;
 
 MQTT_COMMUNICATOR_HANDLE appMqttComm;
 
-static const char* TOPIC_NAME_A = "LPC54608";
-static const char* TOPIC_NAME_B = "LPC54608";
+static const char* TOPIC_NAME_A = "$aws/things/LPC54608_Demo/shadow/update";
+static const char* TOPIC_NAME_B = "$aws/things/LPC54608_Demo/shadow/update";
 static const char* APP_NAME_A = "Message from LPC54608.";
 
 /* MQTT CLIENT INFO */
 static const char* clientId = "LPC54608_Demo";
-#if MQTT_USE_TLS
+#ifdef MQTT_USE_TLS
+#ifdef AWS
 static const char* host = "a32s480yeedt8r.iot.us-east-1.amazonaws.com";
 static int port = 8883;
 static const char* pers = "*.iot.us-east-1.amazonaws.com";
+#else
+static const char* host = "192.168.1.49";
+static int port = 8883;
+static const char* pers = "*.iot.us-east-1.amazonaws.com";
+#endif
 #else
 static const char* host = "iot.eclipse.org";
 static int port = 1883;
@@ -33,6 +39,7 @@ static const char* pers = "raspberrypi";
 static void MqttAppConnectCallback(MQTT_COMMUNICATOR_HANDLE mqtt_comm, void* cbContext)
 {
 	PRINTF("ConnAck function called\r\n");
+	MQTT_Comm_Publish(mqtt_comm, TOPIC_NAME_A, APP_NAME_A, strlen(APP_NAME_A), DELIVER_EXACTLY_ONCE);
 	if (MQTT_Comm_Subcribe(mqtt_comm, TOPIC_NAME_A, DELIVER_EXACTLY_ONCE) != 0)
 	{
 		PRINTF("%d: mqtt_client_subscribe failed\r\n", __LINE__);
@@ -62,7 +69,7 @@ static void MqttAppRecvCallback(MQTT_COMMUNICATOR_HANDLE mqtt_comm, MQTT_MESSAGE
 		PRINTF("%c", messagePayload->message[index]);
 	}
 	PRINTF("\r\nmessage count %d\r\n", ++messageCount);
-#if MQTT_USE_TLS
+#ifdef MQTT_USE_TLS
 	if (MQTT_Comm_Publish(mqtt_comm, TOPIC_NAME_B, APP_NAME_A, strlen(APP_NAME_A), DELIVER_EXACTLY_ONCE) != 0)
 #else
 	if (MQTT_Comm_Publish(mqtt_comm, TOPIC_NAME_A, APP_NAME_A, strlen(APP_NAME_A), DELIVER_EXACTLY_ONCE) != 0)
@@ -87,6 +94,7 @@ void prvMqttAppTask(void* pvParameter)
 #ifdef MQTT_USE_TLS
 	appMqttComm = MQTT_Comm_Create(host, port, clientId, pers, NULL, NULL, true, rootCa, clientCert, privateKey, rootCaSize, clientCertSize, privateKeySize);
 #else
+	appMqttComm = MQTT_Comm_Create(host, port, clientId, pers, NULL, NULL, false, NULL, NULL, NULL, 0, 0, 0);
 #endif
 	if (appMqttComm == NULL)
 		vTaskDelete(NULL);
